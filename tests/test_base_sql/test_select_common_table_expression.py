@@ -1,8 +1,6 @@
-import pytest
-from mindsdb_parser import parse_sql
-from mindsdb_parser.ast import *
-from mindsdb_parser.utils import JoinType
-
+from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser.ast import *
+from mindsdb_sql_parser.utils import JoinType
 
 
 class TestCommonTableExpression:

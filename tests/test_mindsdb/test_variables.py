@@ -1,6 +1,6 @@
-from mindsdb_parser import parse_sql
-from mindsdb_parser.ast import *
-from mindsdb_parser.ast import Variable
+from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser.ast import *
+from mindsdb_sql_parser.ast import Variable
 
 class TestMDBParser:
     def test_select_variable(self):

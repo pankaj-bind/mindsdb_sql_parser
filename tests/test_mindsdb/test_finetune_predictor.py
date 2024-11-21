@@ -1,9 +1,7 @@
-import pytest
-
-from mindsdb_parser import parse_sql
-from mindsdb_parser.ast import *
-from mindsdb_parser.ast.mindsdb.finetune_predictor import FinetunePredictor
-from mindsdb_parser.lexer import MindsDBLexer
+from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser.ast import *
+from mindsdb_sql_parser.ast.mindsdb.finetune_predictor import FinetunePredictor
+from mindsdb_sql_parser.lexer import MindsDBLexer
 
 
 class TestFinetunePredictor:

@@ -4,14 +4,14 @@
 # Installation
 
 ```
-  pip install mindsdb_parser
+  pip install mindsdb_sql_parser
 ```
 
 ## How to use
 
 ```python
 
-from mindsdb_parser import parse_sql
+from mindsdb_sql_parser import parse_sql
 
 query = parse_sql('select b from aaa where c=1')
 

@@ -1,4 +1,4 @@
-from mindsdb_parser.ast import *
+from mindsdb_sql_parser.ast import *
 
 
 class TestAST:

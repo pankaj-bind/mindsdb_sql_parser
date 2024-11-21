@@ -1,4 +1,4 @@
-from mindsdb_parser.lexer import MindsDBLexer
+from mindsdb_sql_parser.lexer import MindsDBLexer
 
 
 class TestMySQLLexer:

@@ -1,9 +1,10 @@
 import pytest
 
-from mindsdb_parser import parse_sql, ParsingException
-from mindsdb_parser.ast import Identifier
-from mindsdb_parser.ast.mindsdb import *
-from mindsdb_parser.lexer import MindsDBLexer
+from mindsdb_sql_parser import parse_sql, ParsingException
+from mindsdb_sql_parser.ast import Identifier
+from mindsdb_sql_parser.ast.mindsdb import *
+from mindsdb_sql_parser.lexer import MindsDBLexer
+
 
 class TestCreateDatabase:
     def test_create_database_lexer(self):

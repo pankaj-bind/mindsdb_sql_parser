@@ -1,6 +1,6 @@
-from mindsdb_parser import parse_sql
-from mindsdb_parser.ast.mindsdb import *
-from mindsdb_parser.ast import *
+from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser.ast.mindsdb import *
+from mindsdb_sql_parser.ast import *
 
 
 class TestJobs:

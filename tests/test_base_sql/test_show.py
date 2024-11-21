@@ -1,8 +1,7 @@
 import pytest
 
-from mindsdb_parser import parse_sql, ParsingException
-from mindsdb_parser.ast.show import Show
-from mindsdb_parser.ast import *
+from mindsdb_sql_parser import parse_sql, ParsingException
+from mindsdb_sql_parser.ast import *
 
 
 class TestShow:

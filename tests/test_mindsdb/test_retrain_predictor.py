@@ -1,10 +1,8 @@
-import pytest
+from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser.ast import *
+from mindsdb_sql_parser.ast.mindsdb.retrain_predictor import RetrainPredictor
+from mindsdb_sql_parser.lexer import MindsDBLexer
 
-from mindsdb_parser import parse_sql, ParsingException
-from mindsdb_parser.ast.mindsdb import *
-from mindsdb_parser.ast import *
-from mindsdb_parser.ast.mindsdb.retrain_predictor import RetrainPredictor
-from mindsdb_parser.lexer import MindsDBLexer
 
 class TestRetrainPredictor:
     def test_retrain_predictor_lexer(self):

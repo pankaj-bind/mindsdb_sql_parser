@@ -4,7 +4,7 @@ import sys
 import os
 import importlib
 
-from mindsdb_parser import parse_sql, Parameter, Select
+from mindsdb_sql_parser import parse_sql, Parameter, Select
 
 
 def load_all_modules_from_dir(dir_names):

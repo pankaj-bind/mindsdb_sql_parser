@@ -1,8 +1,7 @@
 import pytest
 
-from mindsdb_parser import parse_sql
-from mindsdb_parser.ast import *
-
+from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser.ast import *
 
 
 class TestInsert:
@@ -25,7 +24,6 @@ class TestInsert:
 
     def test_insert_no_columns(self):
         sql = "INSERT INTO tbl_name VALUES (1, 3), (4, 5)"
-
         ast = parse_sql(sql)
         expected_ast = Insert(
             table=Identifier('tbl_name'),
