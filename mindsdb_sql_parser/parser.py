@@ -1847,8 +1847,26 @@ class MindsDBParser(Parser):
        'HANDLERS',
        'BINARY',
        'KNOWLEDGE_BASES',
+       'KNOWLEDGE_BASE',
        'ALL',
        'CREATE',
+       'SKILL',
+       'FINETUNE',
+       'IF',
+       'EXISTS',
+       'EVERY',
+       'ANOMALY',
+       'ML_ENGINE',
+       'EVALUATE',
+       'DETECTION',
+       'JOB',
+       # fixme
+       # 'EXCEPT',
+       # 'INTERSECT',
+       'PROJECT',
+       'TRIGGER',
+       'CHATBOT',
+       'SEARCH_PATH'
        )
     def id(self, p):
         return p[0]
