@@ -161,7 +161,7 @@ class ErrorHandling:
         return ast is not None
 
 
-def parse_sql(sql):
+def parse_sql(sql, dialect=None):
     from mindsdb_sql_parser.lexer import MindsDBLexer
     from mindsdb_sql_parser.parser import MindsDBParser
     lexer, parser = MindsDBLexer(), MindsDBParser()
