@@ -1201,3 +1201,38 @@ class TestMindsdb:
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()
 
+    def test_mixed_join(self):
+
+        # modifier
+        query = '''
+        select * from table1 a
+           inner join table2 b on a.x = b.y
+                         and k = p,
+           table3,
+           table4
+        '''
+        expected_ast = Select(
+            targets=[Star()],
+            from_table=Join(
+                left=Join(
+                    left=Join(
+                        left=Identifier('table1', alias=Identifier('a')),
+                        right=Identifier('table2', alias=Identifier('b')),
+                        condition=BinaryOperation(op='and', args=[
+                            BinaryOperation(op='=', args=[Identifier('a.x'), Identifier('b.y')]),
+                            BinaryOperation(op='=', args=[Identifier('k'), Identifier('p')])
+                        ]),
+                        join_type=JoinType.INNER_JOIN,
+                    ),
+                    right=Identifier('table3'),
+                    join_type=JoinType.INNER_JOIN,
+                    implicit=True
+                ),
+                right=Identifier('table4'),
+                join_type=JoinType.INNER_JOIN,
+                implicit=True
+            )
+        )
+        ast = parse_sql(query)
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()

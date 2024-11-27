@@ -1215,7 +1215,8 @@ class MindsDBParser(Parser):
                     condition=p.expr)
 
     @_('from_table_aliased COMMA from_table_aliased',
-       'join_tables_implicit COMMA from_table_aliased')
+       'join_tables_implicit COMMA from_table_aliased',
+       'join_tables COMMA from_table_aliased')
     def join_tables_implicit(self, p):
         return Join(left=p[0],
                     right=p[2],
