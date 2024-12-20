@@ -123,11 +123,18 @@ class WindowFunction(ASTNode):
             alias_str = f'\n{ind1}alias=' + self.alias.to_string()
         else:
             alias_str = ''
+
+        if self.modifier is not None:
+            modifier_str = f'\n{ind1}modifier=' + self.modifier
+        else:
+            modifier_str = ''
+
         return f'{ind}WindowFunction(\n' \
                f'{ind1}function=\n{fnc_str}' \
                f'{partition_str}' \
                f'{order_str}' \
                f'{alias_str}' \
+               f'{modifier_str}' \
                f'\n{ind})'
 
     def to_string(self, *args, **kwargs):
