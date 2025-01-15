@@ -1236,3 +1236,22 @@ class TestMindsdb:
         ast = parse_sql(query)
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()
+
+    def test_asof_join(self):
+        for join_type in ('asof join', 'left asof join', 'asof left join'):
+            query = f'''
+              select * from table1 a
+               {join_type} table2 b on a.x = b.y
+            '''
+            expected_ast = Select(
+                targets=[Star()],
+                from_table=Join(
+                    left=Identifier('table1', alias=Identifier('a')),
+                    right=Identifier('table2', alias=Identifier('b')),
+                    condition=BinaryOperation(op='=', args=[Identifier('a.x'), Identifier('b.y')]),
+                    join_type=join_type,
+                )
+            )
+            ast = parse_sql(query)
+            assert str(ast) == str(expected_ast)
+            assert ast.to_tree() == expected_ast.to_tree()

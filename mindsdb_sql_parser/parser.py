@@ -1283,6 +1283,9 @@ class MindsDBParser(Parser):
        'OUTER JOIN',
        'LEFT OUTER JOIN',
        'FULL OUTER JOIN',
+       'ASOF JOIN',
+       'ASOF LEFT JOIN',
+       'LEFT ASOF JOIN',
        )
     def join_clause(self, p):
         return ' '.join([x for x in p])
