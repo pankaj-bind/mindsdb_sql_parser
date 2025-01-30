@@ -1,5 +1,6 @@
 import re
 from copy import copy, deepcopy
+from typing import List
 
 from mindsdb_sql_parser.ast.base import ASTNode
 from mindsdb_sql_parser.utils import indent
@@ -11,9 +12,13 @@ path_str_parts_regex = re.compile(r'(?:(?:(`[^`]+`))|([^.]+))')
 
 
 def path_str_to_parts(path_str: str):
-    match = re.finditer(path_str_parts_regex, path_str)
-    parts = [x[0].strip('`') for x in match]
-    return parts
+    parts, is_quoted = [], []
+    for x in re.finditer(path_str_parts_regex, path_str):
+        part = x[0].strip('`')
+        parts.append(part)
+        is_quoted.append(x[0] != part)
+
+    return parts, is_quoted
 
 
 RESERVED_KEYWORDS = {
@@ -42,13 +47,17 @@ class Identifier(ASTNode):
             parts = [Star()]
 
         if path_str and not parts:
-            parts = path_str_to_parts(path_str)
+            parts, is_quoted = path_str_to_parts(path_str)
+        else:
+            is_quoted = [False] * len(parts)
         assert isinstance(parts, list)
         self.parts = parts
+        # parts which were quoted
+        self.is_quoted: List[bool] = is_quoted
 
     @classmethod
     def from_path_str(self, value, *args, **kwargs):
-        parts = path_str_to_parts(value)
+        parts, _ = path_str_to_parts(value)
         return Identifier(parts=parts, *args, **kwargs)
 
     def parts_to_str(self):

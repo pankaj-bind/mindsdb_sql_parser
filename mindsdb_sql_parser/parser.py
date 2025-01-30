@@ -1264,7 +1264,7 @@ class MindsDBParser(Parser):
     @_('PLUGINS',
        'ENGINES')
     def from_table(self, p):
-        return Identifier.from_path_str(p[0])
+        return Identifier(p[0])
 
     @_('identifier')
     def from_table(self, p):
@@ -1739,6 +1739,7 @@ class MindsDBParser(Parser):
             node.parts.append(p[2])
         else:
             node.parts += p[2].parts
+            node.is_quoted.append(p[2].is_quoted[0])
         return node
 
     @_('quote_string',
@@ -1749,7 +1750,7 @@ class MindsDBParser(Parser):
     @_('id', 'dquote_string')
     def identifier(self, p):
         value = p[0]
-        return Identifier.from_path_str(value)
+        return Identifier(value)
 
     @_('PARAMETER')
     def parameter(self, p):
