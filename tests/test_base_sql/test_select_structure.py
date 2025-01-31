@@ -1182,6 +1182,43 @@ class TestMindsdb:
         ast = parse_sql(sql)
         assert str(ast) == str(expected_ast)
 
+    def test_double_quote(self):
+        sql = 'select `KEY_ID` from `Table1` where `id`=2'
+
+        expected_ast = Select(
+            targets=[Identifier('KEY_ID')],
+            from_table=Identifier(parts=['Table1']),
+            where=BinaryOperation(op='=', args=[
+                Identifier('id'), Constant(2)
+            ])
+        )
+
+        ast = parse_sql(sql)
+        assert str(ast) == str(expected_ast)
+
+        # check is quoted
+        assert ast.targets[0].is_quoted == [True]
+        assert ast.from_table.is_quoted == [True]
+        assert ast.where.args[0].is_quoted == [True]
+
+        sql = 'select KEY_ID from Table1 where id=2'
+
+        expected_ast = Select(
+            targets=[Identifier('KEY_ID')],
+            from_table=Identifier(parts=['Table1']),
+            where=BinaryOperation(op='=', args=[
+                Identifier('id'), Constant(2)
+            ])
+        )
+
+        ast = parse_sql(sql)
+        assert str(ast) == str(expected_ast)
+
+        # check is not quoted
+        assert ast.targets[0].is_quoted == [False]
+        assert ast.from_table.is_quoted == [False]
+        assert ast.where.args[0].is_quoted == [False]
+
     def test_window_function_mindsdb(self):
 
         # modifier
