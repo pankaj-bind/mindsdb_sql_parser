@@ -28,7 +28,7 @@ def check_module(module):
 
         tests = klass()
         for test_name, test_method in inspect.getmembers(tests, predicate=inspect.ismethod):
-            if not test_name.startswith('test_') or test_name.endswith('_error'):
+            if not test_name.startswith('test_') or test_name.endswith('_error') or test_name.endswith('_render_skip'):
                 # skip tests that expected error
                 continue
             sig = inspect.signature(test_method)

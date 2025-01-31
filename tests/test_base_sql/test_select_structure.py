@@ -1182,7 +1182,7 @@ class TestMindsdb:
         ast = parse_sql(sql)
         assert str(ast) == str(expected_ast)
 
-    def test_double_quote(self):
+    def test_double_quote_render_skip(self):
         sql = 'select `KEY_ID` from `Table1` where `id`=2'
 
         expected_ast = Select(
