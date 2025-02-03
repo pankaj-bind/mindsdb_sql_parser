@@ -1183,10 +1183,10 @@ class TestMindsdb:
         assert str(ast) == str(expected_ast)
 
     def test_double_quote_render_skip(self):
-        sql = 'select `KEY_ID` from `Table1` where `id`=2'
+        sql = 'select `KEY_ID`, `a`.* from `Table1` where `id`=2'
 
         expected_ast = Select(
-            targets=[Identifier('KEY_ID')],
+            targets=[Identifier('KEY_ID'), Identifier(parts=['a', Star()])],
             from_table=Identifier(parts=['Table1']),
             where=BinaryOperation(op='=', args=[
                 Identifier('id'), Constant(2)
@@ -1198,6 +1198,7 @@ class TestMindsdb:
 
         # check is quoted
         assert ast.targets[0].is_quoted == [True]
+        assert ast.targets[1].is_quoted == [True, False]
         assert ast.from_table.is_quoted == [True]
         assert ast.where.args[0].is_quoted == [True]
 
