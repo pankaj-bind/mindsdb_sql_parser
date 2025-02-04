@@ -1731,6 +1731,7 @@ class MindsDBParser(Parser):
        'identifier DOT star')
     def identifier(self, p):
         node = p[0]
+        is_quoted = False
         if isinstance(p[2], Star):
             node.parts.append(p[2])
         elif isinstance(p[2], int):
@@ -1739,7 +1740,8 @@ class MindsDBParser(Parser):
             node.parts.append(p[2])
         else:
             node.parts += p[2].parts
-            node.is_quoted.append(p[2].is_quoted[0])
+            is_quoted = p[2].is_quoted[0]
+        node.is_quoted.append(is_quoted)
         return node
 
     @_('quote_string',
