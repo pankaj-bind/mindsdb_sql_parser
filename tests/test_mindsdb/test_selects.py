@@ -189,25 +189,25 @@ class TestSpecificSelects:
         assert ast.to_tree() == expected_ast.to_tree()
         assert str(ast) == str(expected_ast)
 
-    @pytest.mark.parametrize('op', ['<->', '<+>', '<#>', '<=>', '<~>', '<%>'])
-    def test_vector(self, op):
-        sql = f"SELECT * from TAB1 WHERE embedding {op} '[3,1,2]'"
+    def test_vector(self):
+        for op in ['<->', '<+>', '<#>', '<=>', '<~>', '<%>']:
+            sql = f"SELECT * from TAB1 WHERE embedding {op} '[3,1,2]'"
 
-        ast = parse_sql(sql)
-        expected_ast = Select(
-            targets=[Star()],
-            where=BinaryOperation(
-                op=op,
-                args=[
-                    Identifier('embedding'),
-                    Constant('[3,1,2]')
-                ]
-            ),
-            from_table=Identifier(parts=['TAB1']),
-        )
+            ast = parse_sql(sql)
+            expected_ast = Select(
+                targets=[Star()],
+                where=BinaryOperation(
+                    op=op,
+                    args=[
+                        Identifier('embedding'),
+                        Constant('[3,1,2]')
+                    ]
+                ),
+                from_table=Identifier(parts=['TAB1']),
+            )
 
-        assert ast.to_tree() == expected_ast.to_tree()
-        assert str(ast) == str(expected_ast)
+            assert ast.to_tree() == expected_ast.to_tree()
+            assert str(ast) == str(expected_ast)
 
     def test_match(self):
         sql = "SELECT a~b, a!~c from TAB1"
