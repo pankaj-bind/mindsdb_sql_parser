@@ -73,6 +73,7 @@ class MindsDBLexer(Lexer):
         EQUALS, NEQUALS, GREATER, GEQ, LESS, LEQ,
         AND, OR, NOT, IS, IS_NOT, TYPECAST,
         IN, NOT_IN, LIKE, NOT_LIKE, CONCAT, BETWEEN, WINDOW, OVER, PARTITION_BY,
+        VECT_L2, VECT_L1, VECT_INNER, VECT_COS, VECT_HAMM, VECT_JACC,
         JSON_GET, JSON_GET_STR, INTERVAL,
 
         # Data types
@@ -272,6 +273,13 @@ class MindsDBLexer(Lexer):
     SEMICOLON = r'\;'
 
     # Operators
+    VECT_L2 = r'<->'
+    VECT_L1 = r'<\+>'
+    VECT_INNER = r'<#>'
+    VECT_COS = r'<=>'
+    VECT_HAMM = r'<~>'
+    VECT_JACC = r'<%>'
+
     JSON_GET = r'->'
     JSON_GET_STR = r'->>'
     PLUS = r'\+'
