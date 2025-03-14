@@ -166,12 +166,12 @@ class TestSpecificSelects:
         assert str(ast) == str(expected_ast)
 
     def test_json(self):
-        sql = """SELECT col->1->'c' from TAB1"""
+        sql = """SELECT col->1->>'c' from TAB1"""
 
         ast = parse_sql(sql)
         expected_ast = Select(
             targets=[BinaryOperation(
-                op='->',
+                op='->>',
                 args=[
                     BinaryOperation(
                         op='->',
