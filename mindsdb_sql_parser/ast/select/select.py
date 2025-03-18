@@ -1,3 +1,4 @@
+from typing import List, Union
 import json
 from mindsdb_sql_parser.ast.base import ASTNode
 from mindsdb_sql_parser.utils import indent
@@ -7,7 +8,7 @@ class Select(ASTNode):
 
     def __init__(self,
                  targets,
-                 distinct=False,
+                 distinct: Union[List, bool] = False,
                  from_table=None,
                  where=None,
                  group_by=None,
@@ -22,6 +23,8 @@ class Select(ASTNode):
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.targets = targets
+
+        # if it is list: SELECT DISTINCT ON (c1, c2) ...
         self.distinct = distinct
         self.from_table = from_table
         self.where = where
@@ -105,8 +108,12 @@ class Select(ASTNode):
 
         out_str += "SELECT"
 
-        if self.distinct:
+        if self.distinct is True:
             out_str += ' DISTINCT'
+        elif isinstance(self.distinct, list):
+            distinct_str = ', '.join([c.to_string() for c in self.distinct])
+
+            out_str += f' DISTINCT ON ({distinct_str})'
 
         targets_str = ', '.join([out.to_string() for out in self.targets])
         out_str += f' {targets_str}'

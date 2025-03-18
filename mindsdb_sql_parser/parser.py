@@ -1300,6 +1300,11 @@ class MindsDBParser(Parser):
         targets = p.result_columns
         return Select(targets=targets, distinct=True)
 
+    @_('SELECT DISTINCT ON LPAREN expr_list RPAREN result_columns')
+    def select(self, p):
+        targets = p.result_columns
+        return Select(targets=targets, distinct=p.expr_list)
+
     @_('SELECT result_columns')
     def select(self, p):
         targets = p.result_columns
