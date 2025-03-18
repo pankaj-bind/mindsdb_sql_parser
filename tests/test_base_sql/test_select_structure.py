@@ -121,6 +121,32 @@ class TestSelectStructure:
         assert str(parse_sql(sql)) == sql
         assert parse_sql(sql).distinct
 
+    def test_select_distinct_on(self):
+        # single column with parts, star
+        sql = """SELECT DISTINCT ON (t1.column1) * FROM t1"""
+
+        expected_ast = Select(
+            targets=[Star()],
+            from_table=Identifier('t1'),
+            distinct=[Identifier('t1.column1')]
+        )
+        ast = parse_sql(sql)
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()
+
+        # many columns without parts, not star
+
+        sql = """SELECT DISTINCT ON (column1, column2) column3, column4 FROM t1"""
+
+        expected_ast = Select(
+            targets=[Identifier('column3'), Identifier('column4')],
+            from_table=Identifier('t1'),
+            distinct=[Identifier('column1'), Identifier('column2')]
+        )
+        ast = parse_sql(sql)
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()
+
     def test_select_multiple_from_table(self):
         sql = f'SELECT column1, column2, 1 AS renamed_constant FROM tab'
         ast = parse_sql(sql)
