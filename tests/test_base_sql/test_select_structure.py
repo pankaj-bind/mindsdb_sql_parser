@@ -1293,3 +1293,34 @@ class TestMindsdb:
             ast = parse_sql(query)
             assert str(ast) == str(expected_ast)
             assert ast.to_tree() == expected_ast.to_tree()
+
+    def test_lateral_join(self):
+        query = f'''
+          select * from table1 a
+          INNER JOIN LATERAL (SELECT *
+			FROM table2 b
+			WHERE a.x=b.x
+			LIMIT 1) b ON true
+        '''
+
+        expected_ast = Select(
+            targets=[Star()],
+            from_table=Join(
+                condition=Constant(True),
+                join_type='INNER JOIN LATERAL',
+                left=Identifier('table1', alias=Identifier('a')),
+                right=Select(
+                    targets=[Star()],
+                    from_table=Identifier('table2', alias=Identifier('b')),
+                    where=BinaryOperation(op='=', args=[
+                        Identifier('a.x'), Identifier('b.x')
+                    ]),
+                    limit=Constant(1),
+                    alias=Identifier('b'),
+                    parentheses=True
+                ),
+            )
+        )
+        ast = parse_sql(query)
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()
