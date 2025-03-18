@@ -280,8 +280,8 @@ class MindsDBLexer(Lexer):
     VECT_HAMM = r'<~>'
     VECT_JACC = r'<%>'
 
-    JSON_GET = r'->'
     JSON_GET_STR = r'->>'
+    JSON_GET = r'->'
     PLUS = r'\+'
     MINUS = r'-'
     MATCH = r'~'
