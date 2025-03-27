@@ -1100,6 +1100,7 @@ class MindsDBParser(Parser):
         return select
 
     @_('select LIMIT constant')
+    @_('select FETCH_FIRST constant ROWS_ONLY')
     def select(self, p):
         select = p.select
         ensure_select_keyword_order(select, 'LIMIT')

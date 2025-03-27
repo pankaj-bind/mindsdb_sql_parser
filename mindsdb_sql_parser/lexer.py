@@ -57,6 +57,8 @@ class MindsDBLexer(Lexer):
 
         UNION, ALL, INTERSECT, EXCEPT,
 
+        FETCH_FIRST, ROWS_ONLY,
+
         # CASE
         CASE, ELSE, END, THEN, WHEN,
 
@@ -228,6 +230,9 @@ class MindsDBLexer(Lexer):
     STAR = r'\*'
     FOR = r'\bFOR\b'
     UPDATE = r'\bUPDATE\b'
+    # FETCH FIRST and FETCH NEXT are the same
+    FETCH_FIRST = r'\bFETCH[\s](FIRST|NEXT)\b'
+    ROWS_ONLY = r'\bROWS[\s]ONLY\b'
 
     JOIN = r'\bJOIN\b'
     INNER = r'\bINNER\b'

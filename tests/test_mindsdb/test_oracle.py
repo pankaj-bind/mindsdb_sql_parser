@@ -26,3 +26,17 @@ class TestOracle:
         assert ast.to_tree() == expected_ast.to_tree()
 
         assert ast.where.args[1].is_outer is True
+
+    def test_limit(self):
+        for keyword in ('NEXT', 'FIRST'):
+            sql = f"SELECT * FROM customer FETCH {keyword} 10 ROWS ONLY"
+
+            ast = parse_sql(sql)
+            expected_ast = Select(
+                targets=[Star()],
+                from_table=Identifier('customer'),
+                limit=Constant(10)
+            )
+
+            assert str(ast) == str(expected_ast)
+            assert ast.to_tree() == expected_ast.to_tree()
