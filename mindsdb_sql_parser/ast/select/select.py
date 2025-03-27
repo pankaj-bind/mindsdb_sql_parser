@@ -100,7 +100,7 @@ class Select(ASTNode):
         return out_str
 
     def get_string(self, *args, **kwargs):
-
+        from mindsdb_sql_parser.ast.select.identifier import Identifier
         out_str = ''
         if self.cte is not None:
             cte_str = ', '.join([out.to_string() for out in self.cte])
@@ -126,7 +126,13 @@ class Select(ASTNode):
             out_str += f' WHERE {self.where.to_string()}'
 
         if self.group_by is not None:
-            group_by_str = ', '.join([out.to_string() for out in self.group_by])
+            parts = []
+            for item in self.group_by:
+                part = item.to_string()
+                if isinstance(item, Identifier) and item.with_rollup:
+                    part += ' WITH ROLLUP'
+                parts.append(part)
+            group_by_str = ', '.join(parts)
             out_str += f' GROUP BY {group_by_str}'
 
         if self.having is not None:
@@ -147,7 +153,7 @@ class Select(ASTNode):
             out_str += f' {self.mode}'
 
         if self.using is not None:
-            from mindsdb_sql_parser.ast.select.identifier import Identifier
+
 
             using_ar = []
             for key, value in self.using.items():

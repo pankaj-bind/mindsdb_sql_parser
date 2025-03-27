@@ -39,7 +39,7 @@ def get_reserved_words():
 
 
 class Identifier(ASTNode):
-    def __init__(self, path_str=None, parts=None, is_outer=False, *args, **kwargs):
+    def __init__(self, path_str=None, parts=None, is_outer=False, with_rollup=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert path_str or parts, "Either path_str or parts must be provided for an Identifier"
         assert not (path_str and parts), "Provide either path_str or parts, but not both"
@@ -56,6 +56,7 @@ class Identifier(ASTNode):
         self.is_quoted: List[bool] = is_quoted
         # used to define type of implicit join in oracle
         self.is_outer: bool = is_outer
+        self.with_rollup: bool = with_rollup
 
     @classmethod
     def from_path_str(self, value, *args, **kwargs):

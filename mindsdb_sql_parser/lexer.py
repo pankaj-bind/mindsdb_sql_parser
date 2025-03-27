@@ -51,7 +51,7 @@ class MindsDBLexer(Lexer):
         WITH, SELECT, DISTINCT, FROM, WHERE, AS,
         LIMIT, OFFSET, ASC, DESC, NULLS_FIRST, NULLS_LAST,
         GROUP_BY, HAVING, ORDER_BY,
-        STAR, FOR, UPDATE,
+        STAR, FOR, UPDATE, ROLLUP,
 
         JOIN, INNER, OUTER, CROSS, LEFT, RIGHT, ON, ASOF, LATERAL, IS_OUTER,
 
@@ -233,6 +233,7 @@ class MindsDBLexer(Lexer):
     # FETCH FIRST and FETCH NEXT are the same
     FETCH_FIRST = r'\bFETCH[\s](FIRST|NEXT)\b'
     ROWS_ONLY = r'\bROWS[\s]ONLY\b'
+    ROLLUP = r'\bROLLUP\b'
 
     JOIN = r'\bJOIN\b'
     INNER = r'\bINNER\b'

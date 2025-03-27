@@ -1,6 +1,6 @@
 from mindsdb_sql_parser import parse_sql
 from mindsdb_sql_parser.ast import Select, Identifier, BinaryOperation, Star
-from mindsdb_sql_parser.ast import Variable
+from mindsdb_sql_parser.ast import Variable, Function
 from mindsdb_sql_parser.parser import Show
 
 
@@ -62,5 +62,22 @@ class TestMySQLParser:
         )
 
         # assert str(ast).lower() == sql.lower()
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()
+
+    def test_with_rollup(self):
+        sql = "SELECT country, SUM(sales) FROM booksales GROUP BY country WITH ROLLUP"
+
+        ast = parse_sql(sql)
+        expected_ast = Select(
+            targets=[
+                Identifier('country'),
+                Function(op='SUM', args=[Identifier('sales')])
+            ],
+            from_table=Identifier('booksales'),
+            group_by=[Identifier('country', with_rollup=True)]
+        )
+
+        assert str(ast).lower() == sql.lower()
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()

@@ -1775,6 +1775,12 @@ class MindsDBParser(Parser):
     def string(self, p):
         return p[0]
 
+    @_('identifier WITH ROLLUP')
+    def identifier(self, p):
+        value = p[0]
+        value.with_rollup = True
+        return value
+
     @_('identifier IS_OUTER')
     def identifier(self, p):
         value = p[0]
@@ -1899,6 +1905,9 @@ class MindsDBParser(Parser):
        'EVALUATE',
        'DETECTION',
        'JOB',
+       'ASOF',
+       'LATERAL',
+       'ROLLUP',
        # fixme
        # 'EXCEPT',
        # 'INTERSECT',
