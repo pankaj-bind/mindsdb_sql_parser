@@ -713,6 +713,7 @@ class MindsDBParser(Parser):
        'id id DEFAULT id',
        'id id PRIMARY_KEY',
        'id id LPAREN INTEGER RPAREN',
+       'id id LPAREN INTEGER COMMA INTEGER RPAREN',
        'id id LPAREN INTEGER RPAREN DEFAULT id',
        'PRIMARY_KEY LPAREN column_list RPAREN',
        )
@@ -730,10 +731,18 @@ class MindsDBParser(Parser):
         elif hasattr(p, 'PRIMARY_KEY'):
             is_primary_key = True
 
+        length, length2 = None, None
+        if hasattr(p, 'INTEGER'):
+            length = p.INTEGER
+        elif hasattr(p, 'INTEGER0'):
+            length = p.INTEGER0
+            length2 = p.INTEGER1
+
         return TableColumn(
             name=p[0],
             type=p[1],
-            length=getattr(p, 'INTEGER', None),
+            length=length,
+            length2=length2,
             default=default,
             is_primary_key=is_primary_key
         )
@@ -1100,6 +1109,7 @@ class MindsDBParser(Parser):
         return select
 
     @_('select LIMIT constant')
+    @_('select FETCH_FIRST constant ROWS_ONLY')
     def select(self, p):
         select = p.select
         ensure_select_keyword_order(select, 'LIMIT')
@@ -1764,6 +1774,12 @@ class MindsDBParser(Parser):
        'dquote_string')
     def string(self, p):
         return p[0]
+
+    @_('identifier IS_OUTER')
+    def identifier(self, p):
+        value = p[0]
+        value.is_outer = True
+        return value
 
     @_('id', 'dquote_string')
     def identifier(self, p):

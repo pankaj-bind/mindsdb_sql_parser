@@ -53,9 +53,11 @@ class MindsDBLexer(Lexer):
         GROUP_BY, HAVING, ORDER_BY,
         STAR, FOR, UPDATE,
 
-        JOIN, INNER, OUTER, CROSS, LEFT, RIGHT, ON, ASOF, LATERAL,
+        JOIN, INNER, OUTER, CROSS, LEFT, RIGHT, ON, ASOF, LATERAL, IS_OUTER,
 
         UNION, ALL, INTERSECT, EXCEPT,
+
+        FETCH_FIRST, ROWS_ONLY,
 
         # CASE
         CASE, ELSE, END, THEN, WHEN,
@@ -165,7 +167,7 @@ class MindsDBLexer(Lexer):
     STATUS = r'\bSTATUS\b'
     GLOBAL = r'\bGLOBAL\b'
     PROCEDURE = r'\bPROCEDURE\b'
-    PRIMARY_KEY = r'\bPRIMARY[_|\s]KEY\b'
+    PRIMARY_KEY = r'\bPRIMARY[\s]KEY\b'
     DEFAULT = r'\bDEFAULT\b'
     FUNCTION = r'\bFUNCTION\b'
     INDEX = r'\bINDEX\b'
@@ -228,6 +230,9 @@ class MindsDBLexer(Lexer):
     STAR = r'\*'
     FOR = r'\bFOR\b'
     UPDATE = r'\bUPDATE\b'
+    # FETCH FIRST and FETCH NEXT are the same
+    FETCH_FIRST = r'\bFETCH[\s](FIRST|NEXT)\b'
+    ROWS_ONLY = r'\bROWS[\s]ONLY\b'
 
     JOIN = r'\bJOIN\b'
     INNER = r'\bINNER\b'
@@ -237,6 +242,7 @@ class MindsDBLexer(Lexer):
     RIGHT = r'\bRIGHT\b'
     ASOF = r'\bASOF\b'
     LATERAL = r'\bLATERAL\b'
+    IS_OUTER = r'\(\+\)'
 
     # UNION
 

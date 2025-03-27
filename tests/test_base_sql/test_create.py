@@ -137,6 +137,8 @@ class TestCreateMindsdb:
             location_id INT,
             num INT,
             name TEXT,
+            balance decimal(5,2),
+            links NUMBER(10, 0) NOT NULL,
             PRIMARY KEY (location_id, num)  
          )
         '''
@@ -148,6 +150,8 @@ class TestCreateMindsdb:
                 TableColumn(name='location_id', type='INT', is_primary_key=True),
                 TableColumn(name='num', type='INT', is_primary_key=True),
                 TableColumn(name='name', type='TEXT'),
+                TableColumn(name='balance', type='decimal', length=5, length2=2),
+                TableColumn(name='links', type='NUMBER', nullable=False, length=10, length2=0),
             ]
         )
 
