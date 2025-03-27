@@ -713,6 +713,7 @@ class MindsDBParser(Parser):
        'id id DEFAULT id',
        'id id PRIMARY_KEY',
        'id id LPAREN INTEGER RPAREN',
+       'id id LPAREN INTEGER COMMA INTEGER RPAREN',
        'id id LPAREN INTEGER RPAREN DEFAULT id',
        'PRIMARY_KEY LPAREN column_list RPAREN',
        )
@@ -730,10 +731,18 @@ class MindsDBParser(Parser):
         elif hasattr(p, 'PRIMARY_KEY'):
             is_primary_key = True
 
+        length, length2 = None, None
+        if hasattr(p, 'INTEGER'):
+            length = p.INTEGER
+        elif hasattr(p, 'INTEGER0'):
+            length = p.INTEGER0
+            length2 = p.INTEGER1
+
         return TableColumn(
             name=p[0],
             type=p[1],
-            length=getattr(p, 'INTEGER', None),
+            length=length,
+            length2=length2,
             default=default,
             is_primary_key=is_primary_key
         )
