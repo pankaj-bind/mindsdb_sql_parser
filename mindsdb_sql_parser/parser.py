@@ -1765,6 +1765,12 @@ class MindsDBParser(Parser):
     def string(self, p):
         return p[0]
 
+    @_('identifier IS_OUTER')
+    def identifier(self, p):
+        value = p[0]
+        value.is_outer = True
+        return value
+
     @_('id', 'dquote_string')
     def identifier(self, p):
         value = p[0]

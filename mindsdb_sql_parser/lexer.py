@@ -53,7 +53,7 @@ class MindsDBLexer(Lexer):
         GROUP_BY, HAVING, ORDER_BY,
         STAR, FOR, UPDATE,
 
-        JOIN, INNER, OUTER, CROSS, LEFT, RIGHT, ON, ASOF, LATERAL,
+        JOIN, INNER, OUTER, CROSS, LEFT, RIGHT, ON, ASOF, LATERAL, IS_OUTER,
 
         UNION, ALL, INTERSECT, EXCEPT,
 
@@ -237,6 +237,7 @@ class MindsDBLexer(Lexer):
     RIGHT = r'\bRIGHT\b'
     ASOF = r'\bASOF\b'
     LATERAL = r'\bLATERAL\b'
+    IS_OUTER = r'\(\+\)'
 
     # UNION
 
