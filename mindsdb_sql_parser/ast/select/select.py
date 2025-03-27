@@ -158,6 +158,8 @@ class Select(ASTNode):
                     ]
                     args_str = ', '.join(args)
                     value = f'{value.type}({args_str})'
+                if isinstance(value, Identifier):
+                    value = value.to_string()
                 else:
                     value = json.dumps(value)
 
