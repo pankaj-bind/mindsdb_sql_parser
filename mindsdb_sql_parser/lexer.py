@@ -167,7 +167,7 @@ class MindsDBLexer(Lexer):
     STATUS = r'\bSTATUS\b'
     GLOBAL = r'\bGLOBAL\b'
     PROCEDURE = r'\bPROCEDURE\b'
-    PRIMARY_KEY = r'\bPRIMARY[_|\s]KEY\b'
+    PRIMARY_KEY = r'\bPRIMARY[\s]KEY\b'
     DEFAULT = r'\bDEFAULT\b'
     FUNCTION = r'\bFUNCTION\b'
     INDEX = r'\bINDEX\b'
