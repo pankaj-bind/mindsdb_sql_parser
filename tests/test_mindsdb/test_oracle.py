@@ -4,7 +4,7 @@ from mindsdb_sql_parser.utils import JoinType
 
 
 class TestOracle:
-    def test_left_outer_join(self):
+    def test_left_outer_join_render_skip(self):
         sql = "SELECT * FROM customer, orders "\
               "WHERE c_custkey = o_custkey(+)"
 
