@@ -68,7 +68,7 @@ class TestSpecificSelects:
         sql = """
            SELECT status FROM tbl1
            group by 1
-           using p1=1, p2='2'
+           using p1=1, p2='2', p3=column
         """
         ast = parse_sql(sql)
         expected_ast = Select(
@@ -77,7 +77,8 @@ class TestSpecificSelects:
             group_by=[Constant(1)],
             using={
                 'p1': 1,
-                'p2': '2'
+                'p2': '2',
+                'p3': Identifier('column')
             }
         )
 

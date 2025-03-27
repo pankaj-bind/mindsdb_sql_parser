@@ -1326,13 +1326,15 @@ class TestMindsdb:
           INNER JOIN LATERAL (SELECT *
 			FROM table2 b
 			WHERE a.x=b.x
-			LIMIT 1) b ON true
+			LIMIT 1) b ON 1=1
         '''
 
         expected_ast = Select(
             targets=[Star()],
             from_table=Join(
-                condition=Constant(True),
+                condition=BinaryOperation(op='=', args=[
+                    Constant(1), Constant(1)
+                ]),
                 join_type='INNER JOIN LATERAL',
                 left=Identifier('table1', alias=Identifier('a')),
                 right=Select(
