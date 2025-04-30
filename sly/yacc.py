@@ -983,7 +983,6 @@ class LRTable(object):
         self.lr_goto_cache = None
         self.lr_goto_cache2 = None
         self.lr0_cidhash = None
-        self.grammar = None
 
     # Compute the LR(0) closure operation on I, where I is a set of LR(0) items.
     def lr0_closure(self, I):
