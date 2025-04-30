@@ -34,7 +34,7 @@
 import sys
 import os
 import inspect
-import pickle
+import json
 from collections import OrderedDict, defaultdict, Counter
 
 __all__        = [ 'Parser' ]
@@ -937,7 +937,7 @@ class LALRError(YaccError):
 # -----------------------------------------------------------------------------
 
 class LRTable(object):
-    def __init__(self, grammar, lr_vars=None):
+    def __init__(self, grammar, lr_dump=None):
         self.grammar = grammar
 
         # Internal attributes
@@ -963,8 +963,8 @@ class LRTable(object):
         self.grammar.compute_first()
         self.grammar.compute_follow()
 
-        if lr_vars is not None:
-            self.lr_action, self.lr_goto = lr_vars
+        if lr_dump is not None:
+            self.load(lr_dump)
         else:
             self.lr_action     = {}        # Action table
             self.lr_goto       = {}        # Goto table
@@ -987,6 +987,17 @@ class LRTable(object):
         self.lr_goto_cache = None
         self.lr_goto_cache2 = None
         self.lr0_cidhash = None
+
+    def dump(self):
+        return [
+            list(self.lr_action.items()),
+            list(self.lr_goto.items()),
+        ]
+
+    def load(self, obj):
+        action, goto = obj
+        self.lr_action = dict(action)
+        self.lr_goto = dict(goto)
 
     # Compute the LR(0) closure operation on I, where I is a set of LR(0) items.
     def lr0_closure(self, I):
@@ -1994,15 +2005,14 @@ class Parser(metaclass=ParserMeta):
     @classmethod
     def _get_build_file(cls):
         path = inspect.getfile(cls)
-        return path[: path.rfind('.')] + '.pkl'
+        return path[: path.rfind('.')] + '.json'
 
     @classmethod
     def build_to_file(self):
         path = self._get_build_file()
 
-        lr_table = self._lrtable
-        lr_vars = (lr_table.lr_action, lr_table.lr_goto)
-        pickle.dump(lr_vars, open(path, 'wb'))
+        lr_dump = self._lrtable.dump()
+        json.dump(lr_dump, open(path, 'w'))
         print('Built to', path)
 
     @classmethod
@@ -2012,15 +2022,14 @@ class Parser(metaclass=ParserMeta):
         '''
         # use cache
         build_file = cls._get_build_file()
-        lr_vars = None
+        lr_dump = None
         if os.path.exists(build_file):
             try:
-                lr_vars = pickle.load(open(build_file, 'rb'))
-                assert len(lr_vars) == 2
+                lr_dump = json.load(open(build_file, 'r'))
             except Exception:
                 pass
 
-        lrtable = LRTable(cls._grammar, lr_vars=lr_vars)
+        lrtable = LRTable(cls._grammar, lr_dump=lr_dump)
         num_sr = len(lrtable.sr_conflicts)
 
         # Report shift/reduce and reduce/reduce conflicts
