@@ -150,7 +150,7 @@ class YaccProduction:
     
     def __getattr__(self, name):
         if name in self._namemap:
-            return self._namemap[name](self._slice)
+            return self._slice[self._namemap[name]].value
         else:
             nameset = '{' + ', '.join(self._namemap) + '}'
             raise AttributeError(f'No symbol {name}. Must be one of {nameset}.')
@@ -233,7 +233,7 @@ class Production(object):
                 nameuse[key] += 1
             else:
                 k = key
-            namemap[k] = lambda s,i=index: s[i].value
+            namemap[k] = index
             if key in _name_aliases:
                 for n, alias in enumerate(_name_aliases[key]):
                     if namecount[alias] > 1:
@@ -241,7 +241,8 @@ class Production(object):
                         nameuse[alias] += 1
                     else:
                         k = alias
-                    # The value is either a list (for repetition) or a tuple for optional 
+                    # The value is either a list (for repetition) or a tuple for optional
+                    raise RuntimeError('Refactor the line below')  # this code is not called
                     namemap[k] = lambda s,i=index,n=n: ([x[n] for x in s[i].value]) if isinstance(s[i].value, list) else s[i].value[n]
 
         self.namemap = namemap
@@ -686,7 +687,7 @@ class Grammar(object):
     def _first(self, beta):
 
         # We are computing First(x1,x2,x3,...,xn)
-        result = []
+        result = set()
         for x in beta:
             x_produces_empty = False
 
@@ -695,8 +696,7 @@ class Grammar(object):
                 if f == '<empty>':
                     x_produces_empty = True
                 else:
-                    if f not in result:
-                        result.append(f)
+                    result.add(f)
 
             if x_produces_empty:
                 # We have to consider the next x in beta,
@@ -709,7 +709,7 @@ class Grammar(object):
             # There was no 'break' from the loop,
             # so x_produces_empty was true for all x in beta,
             # so beta produces empty as well.
-            result.append('<empty>')
+            result.add('<empty>')
 
         return result
 
@@ -724,25 +724,24 @@ class Grammar(object):
 
         # Terminals:
         for t in self.Terminals:
-            self.First[t] = [t]
+            self.First[t] = {t}
 
-        self.First['$end'] = ['$end']
+        self.First['$end'] = {'$end'}
 
         # Nonterminals:
 
         # Initialize to the empty set:
         for n in self.Nonterminals:
-            self.First[n] = []
+            self.First[n] = set()
 
         # Then propagate symbols until no change:
         while True:
             some_change = False
             for n in self.Nonterminals:
                 for p in self.Prodnames[n]:
-                    for f in self._first(p.prod):
-                        if f not in self.First[n]:
-                            self.First[n].append(f)
-                            some_change = True
+                    length = len(self.First[n])
+                    self.First[n].update(self._first(p.prod))
+                    some_change = length != len(self.First[n])
             if not some_change:
                 break
 
@@ -766,12 +765,12 @@ class Grammar(object):
 
         # Add '$end' to the follow list of the start symbol
         for k in self.Nonterminals:
-            self.Follow[k] = []
+            self.Follow[k] = set()
 
         if not start:
             start = self.Productions[1].name
 
-        self.Follow[start] = ['$end']
+        self.Follow[start] = {'$end'}
 
         while True:
             didadd = False
@@ -784,16 +783,15 @@ class Grammar(object):
                         hasempty = False
                         for f in fst:
                             if f != '<empty>' and f not in self.Follow[B]:
-                                self.Follow[B].append(f)
+                                self.Follow[B].add(f)
                                 didadd = True
                             if f == '<empty>':
                                 hasempty = True
                         if hasempty or i == (len(p.prod)-1):
                             # Add elements of follow(a) to follow(b)
-                            for f in self.Follow[p.name]:
-                                if f not in self.Follow[B]:
-                                    self.Follow[B].append(f)
-                                    didadd = True
+                            length = len(self.Follow[B])
+                            self.Follow[B].update(self.Follow[p.name])
+                            didadd = len(self.Follow[B]) != length
             if not didadd:
                 break
         return self.Follow
