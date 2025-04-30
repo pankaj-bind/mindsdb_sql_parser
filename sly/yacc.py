@@ -2028,6 +2028,8 @@ class Parser(metaclass=ParserMeta):
                 lr_dump = json.load(open(build_file, 'r'))
             except Exception:
                 pass
+        if lr_dump is None:
+            print('Unable to load lr_table dump, parsing initialization might be slower')
 
         lrtable = LRTable(cls._grammar, lr_dump=lr_dump)
         num_sr = len(lrtable.sr_conflicts)
