@@ -32,7 +32,9 @@
 # -----------------------------------------------------------------------------
 
 import sys
+import os
 import inspect
+import pickle
 from collections import OrderedDict, defaultdict, Counter
 
 __all__        = [ 'Parser' ]
@@ -935,12 +937,10 @@ class LALRError(YaccError):
 # -----------------------------------------------------------------------------
 
 class LRTable(object):
-    def __init__(self, grammar):
+    def __init__(self, grammar, lr_vars=None):
         self.grammar = grammar
 
         # Internal attributes
-        self.lr_action     = {}        # Action table
-        self.lr_goto       = {}        # Goto table
         self.lr_productions  = grammar.Productions    # Copy of grammar Production array
 
         # Cache of computed gotos
@@ -962,7 +962,13 @@ class LRTable(object):
         self.grammar.build_lritems()
         self.grammar.compute_first()
         self.grammar.compute_follow()
-        self.lr_parse_table()
+
+        if lr_vars is not None:
+            self.lr_action, self.lr_goto = lr_vars
+        else:
+            self.lr_action     = {}        # Action table
+            self.lr_goto       = {}        # Goto table
+            self.lr_parse_table()
 
         # Build default states
         # This identifies parser states where there is only one possible reduction action.
@@ -1986,11 +1992,35 @@ class Parser(metaclass=ParserMeta):
             raise YaccError('Unable to build grammar.\n'+errors)
 
     @classmethod
+    def _get_build_file(cls):
+        path = inspect.getfile(cls)
+        return path[: path.rfind('.')] + '.pkl'
+
+    @classmethod
+    def build_to_file(self):
+        path = self._get_build_file()
+
+        lr_table = self._lrtable
+        lr_vars = (lr_table.lr_action, lr_table.lr_goto)
+        pickle.dump(lr_vars, open(path, 'wb'))
+        print('Built to', path)
+
+    @classmethod
     def __build_lrtables(cls):
         '''
         Build the LR Parsing tables from the grammar
         '''
-        lrtable = LRTable(cls._grammar)
+        # use cache
+        build_file = cls._get_build_file()
+        lr_vars = None
+        if os.path.exists(build_file):
+            try:
+                lr_vars = pickle.load(open(build_file, 'rb'))
+                assert len(lr_vars) == 2
+            except Exception:
+                pass
+
+        lrtable = LRTable(cls._grammar, lr_vars=lr_vars)
         num_sr = len(lrtable.sr_conflicts)
 
         # Report shift/reduce and reduce/reduce conflicts
