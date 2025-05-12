@@ -32,7 +32,9 @@
 # -----------------------------------------------------------------------------
 
 import sys
+import os
 import inspect
+import json
 from collections import OrderedDict, defaultdict, Counter
 
 __all__        = [ 'Parser' ]
@@ -150,7 +152,7 @@ class YaccProduction:
     
     def __getattr__(self, name):
         if name in self._namemap:
-            return self._namemap[name](self._slice)
+            return self._slice[self._namemap[name]].value
         else:
             nameset = '{' + ', '.join(self._namemap) + '}'
             raise AttributeError(f'No symbol {name}. Must be one of {nameset}.')
@@ -202,6 +204,7 @@ class Production(object):
         self.file     = file
         self.line     = line
         self.prec     = precedence
+        self.lr0_added = 0
         
         # Internal settings used during table construction
         self.len  = len(self.prod)   # Length of the production
@@ -232,7 +235,7 @@ class Production(object):
                 nameuse[key] += 1
             else:
                 k = key
-            namemap[k] = lambda s,i=index: s[i].value
+            namemap[k] = index
             if key in _name_aliases:
                 for n, alias in enumerate(_name_aliases[key]):
                     if namecount[alias] > 1:
@@ -240,7 +243,8 @@ class Production(object):
                         nameuse[alias] += 1
                     else:
                         k = alias
-                    # The value is either a list (for repetition) or a tuple for optional 
+                    # The value is either a list (for repetition) or a tuple for optional
+                    raise RuntimeError('Refactor the line below')  # this code is not called
                     namemap[k] = lambda s,i=index,n=n: ([x[n] for x in s[i].value]) if isinstance(s[i].value, list) else s[i].value[n]
 
         self.namemap = namemap
@@ -319,7 +323,7 @@ class LRItem(object):
         self.prod       = list(p.prod)
         self.number     = p.number
         self.lr_index   = n
-        self.lookaheads = {}
+        self.lookaheads = defaultdict(set)
         self.prod.insert(n, '.')
         self.prod       = tuple(self.prod)
         self.len        = len(self.prod)
@@ -685,7 +689,7 @@ class Grammar(object):
     def _first(self, beta):
 
         # We are computing First(x1,x2,x3,...,xn)
-        result = []
+        result = set()
         for x in beta:
             x_produces_empty = False
 
@@ -694,8 +698,7 @@ class Grammar(object):
                 if f == '<empty>':
                     x_produces_empty = True
                 else:
-                    if f not in result:
-                        result.append(f)
+                    result.add(f)
 
             if x_produces_empty:
                 # We have to consider the next x in beta,
@@ -708,7 +711,7 @@ class Grammar(object):
             # There was no 'break' from the loop,
             # so x_produces_empty was true for all x in beta,
             # so beta produces empty as well.
-            result.append('<empty>')
+            result.add('<empty>')
 
         return result
 
@@ -723,25 +726,24 @@ class Grammar(object):
 
         # Terminals:
         for t in self.Terminals:
-            self.First[t] = [t]
+            self.First[t] = {t}
 
-        self.First['$end'] = ['$end']
+        self.First['$end'] = {'$end'}
 
         # Nonterminals:
 
         # Initialize to the empty set:
         for n in self.Nonterminals:
-            self.First[n] = []
+            self.First[n] = set()
 
         # Then propagate symbols until no change:
         while True:
             some_change = False
             for n in self.Nonterminals:
                 for p in self.Prodnames[n]:
-                    for f in self._first(p.prod):
-                        if f not in self.First[n]:
-                            self.First[n].append(f)
-                            some_change = True
+                    length = len(self.First[n])
+                    self.First[n].update(self._first(p.prod))
+                    some_change = length != len(self.First[n])
             if not some_change:
                 break
 
@@ -765,12 +767,12 @@ class Grammar(object):
 
         # Add '$end' to the follow list of the start symbol
         for k in self.Nonterminals:
-            self.Follow[k] = []
+            self.Follow[k] = set()
 
         if not start:
             start = self.Productions[1].name
 
-        self.Follow[start] = ['$end']
+        self.Follow[start] = {'$end'}
 
         while True:
             didadd = False
@@ -783,16 +785,15 @@ class Grammar(object):
                         hasempty = False
                         for f in fst:
                             if f != '<empty>' and f not in self.Follow[B]:
-                                self.Follow[B].append(f)
+                                self.Follow[B].add(f)
                                 didadd = True
                             if f == '<empty>':
                                 hasempty = True
                         if hasempty or i == (len(p.prod)-1):
                             # Add elements of follow(a) to follow(b)
-                            for f in self.Follow[p.name]:
-                                if f not in self.Follow[B]:
-                                    self.Follow[B].append(f)
-                                    didadd = True
+                            length = len(self.Follow[B])
+                            self.Follow[B].update(self.Follow[p.name])
+                            didadd = len(self.Follow[B]) != length
             if not didadd:
                 break
         return self.Follow
@@ -915,9 +916,7 @@ def traverse(x, N, stack, F, X, R, FP):
         if N[y] == 0:
             traverse(y, N, stack, F, X, R, FP)
         N[x] = min(N[x], N[y])
-        for a in F.get(y, []):
-            if a not in F[x]:
-                F[x].append(a)
+        F[x].update(F[y])
     if N[x] == d:
         N[stack[-1]] = MAXINT
         F[stack[-1]] = F[x]
@@ -938,14 +937,15 @@ class LALRError(YaccError):
 # -----------------------------------------------------------------------------
 
 class LRTable(object):
-    def __init__(self, grammar):
+    def __init__(self, grammar, lr_dump=None):
         self.grammar = grammar
 
         # Internal attributes
-        self.lr_action     = {}        # Action table
-        self.lr_goto       = {}        # Goto table
         self.lr_productions  = grammar.Productions    # Copy of grammar Production array
-        self.lr_goto_cache = {}        # Cache of computed gotos
+
+        # Cache of computed gotos
+        self.lr_goto_cache = defaultdict(dict)
+        self.lr_goto_cache2 = {}
         self.lr0_cidhash   = {}        # Cache of closures
         self._add_count    = 0         # Internal counter used to detect cycles
 
@@ -962,7 +962,13 @@ class LRTable(object):
         self.grammar.build_lritems()
         self.grammar.compute_first()
         self.grammar.compute_follow()
-        self.lr_parse_table()
+
+        if lr_dump is not None:
+            self.load(lr_dump)
+        else:
+            self.lr_action     = {}        # Action table
+            self.lr_goto       = {}        # Goto table
+            self.lr_parse_table()
 
         # Build default states
         # This identifies parser states where there is only one possible reduction action.
@@ -977,6 +983,21 @@ class LRTable(object):
             rules = list(actions.values())
             if len(rules) == 1 and rules[0] < 0:
                 self.defaulted_states[state] = rules[0]
+        # clear cache
+        self.lr_goto_cache = None
+        self.lr_goto_cache2 = None
+        self.lr0_cidhash = None
+
+    def dump(self):
+        return [
+            list(self.lr_action.items()),
+            list(self.lr_goto.items()),
+        ]
+
+    def load(self, obj):
+        action, goto = obj
+        self.lr_action = dict(action)
+        self.lr_goto = dict(goto)
 
     # Compute the LR(0) closure operation on I, where I is a set of LR(0) items.
     def lr0_closure(self, I):
@@ -989,7 +1010,7 @@ class LRTable(object):
             didadd = False
             for j in J:
                 for x in j.lr_after:
-                    if getattr(x, 'lr0_added', 0) == self._add_count:
+                    if x.lr0_added == self._add_count:
                         continue
                     # Add B --> .G to J
                     J.append(x.lr_next)
@@ -1005,30 +1026,41 @@ class LRTable(object):
     # objects).  With uniqueness, we can later do fast set comparisons using
     # id(obj) instead of element-wise comparison.
 
-    def lr0_goto(self, I, x):
+    def lr0_goto(self, I, x, I_d=None):
         # First we look for a previously cached entry
-        g = self.lr_goto_cache.get((id(I), x))
+        g = self.lr_goto_cache[id(I)].get(x)
         if g:
             return g
 
         # Now we generate the goto set in a way that guarantees uniqueness
         # of the result
 
-        s = self.lr_goto_cache.get(x)
+        s = self.lr_goto_cache2.get(x)
         if not s:
             s = {}
-            self.lr_goto_cache[x] = s
+            self.lr_goto_cache2[x] = s
 
         gs = []
-        for p in I:
-            n = p.lr_next
-            if n and n.lr_before == x:
+
+        if I_d is None:
+            for p in I:
+                n = p.lr_next
+                if n and n.lr_before == x:
+                    s1 = s.get(id(n))
+                    if not s1:
+                        s1 = {}
+                        s[id(n)] = s1
+                    gs.append(n)
+                    s = s1
+        else:
+            for n in I_d[x]:
                 s1 = s.get(id(n))
                 if not s1:
                     s1 = {}
                     s[id(n)] = s1
                 gs.append(n)
                 s = s1
+
         g = s.get('$end')
         if not g:
             if gs:
@@ -1036,8 +1068,17 @@ class LRTable(object):
                 s['$end'] = g
             else:
                 s['$end'] = gs
-        self.lr_goto_cache[(id(I), x)] = g
+        self.lr_goto_cache[id(I)][x] = g
         return g
+
+    def get_i_map(self, I):
+        # creates structure for faster search
+        I_d = defaultdict(list)
+        for p in I:
+            n = p.lr_next
+            if n:
+                I_d[n.lr_before].append(n)
+        return I_d
 
     # Compute the LR(0) sets of item function
     def lr0_items(self):
@@ -1053,6 +1094,8 @@ class LRTable(object):
             I = C[i]
             i += 1
 
+            I_d = self.get_i_map(I)
+
             # Collect all of the symbols that could possibly be in the goto(I,X) sets
             asyms = {}
             for ii in I:
@@ -1060,7 +1103,7 @@ class LRTable(object):
                     asyms[s] = None
 
             for x in asyms:
-                g = self.lr0_goto(I, x)
+                g = self.lr0_goto(I, x, I_d)
                 if not g or id(g) in self.lr0_cidhash:
                     continue
                 self.lr0_cidhash[id(g)] = len(C)
@@ -1146,21 +1189,19 @@ class LRTable(object):
     # -----------------------------------------------------------------------------
 
     def dr_relation(self, C, trans, nullable):
-        dr_set = {}
         state, N = trans
-        terms = []
+        terms = set()
 
         g = self.lr0_goto(C[state], N)
         for p in g:
             if p.lr_index < p.len - 1:
                 a = p.prod[p.lr_index+1]
                 if a in self.grammar.Terminals:
-                    if a not in terms:
-                        terms.append(a)
+                    terms.add(a)
 
         # This extra bit is to handle the start state
         if state == 0 and N == self.grammar.Productions[0].prod[0]:
-            terms.append('$end')
+            terms.add('$end')
 
         return terms
 
@@ -1335,14 +1376,11 @@ class LRTable(object):
 
     def add_lookaheads(self, lookbacks, followset):
         for trans, lb in lookbacks.items():
+            f = followset[trans]
+
             # Loop over productions in lookback
             for state, p in lb:
-                if state not in p.lookaheads:
-                    p.lookaheads[state] = set()
-
-                f = followset.get(trans, [])
-                for a in f:
-                    p.lookaheads[state].add(a)
+                p.lookaheads[state].update(f)
 
     # -----------------------------------------------------------------------------
     # add_lalr_lookaheads()
@@ -1391,6 +1429,8 @@ class LRTable(object):
 
         # Build the parser table, state by state
         for st, I in enumerate(C):
+            I_d = self.get_i_map(I)
+
             descrip = []
             # Loop over each production in I
             actlist = []              # List of actions
@@ -1468,7 +1508,7 @@ class LRTable(object):
                         i = p.lr_index
                         a = p.prod[i+1]       # Get symbol right after the "."
                         if a in self.grammar.Terminals:
-                            g = self.lr0_goto(I, a)
+                            g = self.lr0_goto(I, a, I_d)
                             j = self.lr0_cidhash.get(id(g), -1)
                             if j >= 0:
                                 # We are in a shift state
@@ -1524,7 +1564,7 @@ class LRTable(object):
                     if s in self.grammar.Nonterminals:
                         nkeys[s] = None
             for n in nkeys:
-                g = self.lr0_goto(I, n)
+                g = self.lr0_goto(I, n, I_d)
                 j = self.lr0_cidhash.get(id(g), -1)
                 if j >= 0:
                     st_goto[n] = j
@@ -1963,11 +2003,35 @@ class Parser(metaclass=ParserMeta):
             raise YaccError('Unable to build grammar.\n'+errors)
 
     @classmethod
+    def _get_build_file(cls):
+        path = inspect.getfile(cls)
+        return path[: path.rfind('.')] + '.json'
+
+    @classmethod
+    def build_to_file(self):
+        path = self._get_build_file()
+
+        lr_dump = self._lrtable.dump()
+        json.dump(lr_dump, open(path, 'w'))
+        print('Built to', path)
+
+    @classmethod
     def __build_lrtables(cls):
         '''
         Build the LR Parsing tables from the grammar
         '''
-        lrtable = LRTable(cls._grammar)
+        # use cache
+        build_file = cls._get_build_file()
+        lr_dump = None
+        if os.path.exists(build_file):
+            try:
+                lr_dump = json.load(open(build_file, 'r'))
+            except Exception:
+                pass
+        if lr_dump is None:
+            print('Unable to load lr_table dump, parsing initialization might be slower')
+
+        lrtable = LRTable(cls._grammar, lr_dump=lr_dump)
         num_sr = len(lrtable.sr_conflicts)
 
         # Report shift/reduce and reduce/reduce conflicts
