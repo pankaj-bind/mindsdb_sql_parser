@@ -25,7 +25,7 @@ setuptools.setup(
     description=about['__description__'],
     packages=setuptools.find_packages(exclude=('tests*',)),
     package_data={
-        about['__title__']: ['*.json'],  # Adjust the path as needed
+        about['__title__']: ['*.json'],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
