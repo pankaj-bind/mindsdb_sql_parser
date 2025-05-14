@@ -15,3 +15,5 @@ class Variable(ASTNode):
     def get_string(self, *args, **kwargs):
         return ('@@' if self.is_system_var else '@') + f'{str(self.value)}'
 
+    def __repr__(self):
+        return self.get_string()
