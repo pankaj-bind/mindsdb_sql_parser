@@ -1716,7 +1716,7 @@ class MindsDBParser(Parser):
 
     @_('string COLON json_value')
     def json_element(self, p):
-        return {p.string:p.json_value}
+        return {p.string: p.json_value}
 
     # json_array
 
@@ -1736,6 +1736,7 @@ class MindsDBParser(Parser):
     @_('float',
        'string',
        'integer',
+       'variable',
        'NULL',
        'TRUE',
        'FALSE',

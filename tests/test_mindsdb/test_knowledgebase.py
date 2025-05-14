@@ -1,4 +1,4 @@
-from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser import parse_sql, Variable
 from mindsdb_sql_parser.ast.mindsdb.knowledge_base import (
     CreateKnowledgeBase,
     DropKnowledgeBase,
@@ -174,7 +174,7 @@ class TestKB:
                 MODEL = mindsdb.my_embedding_model,
                 STORAGE = my_vector_database.some_table,
                 some_param = 'some value',
-                other_param = 'other value'
+                other_param = {'key': @var1}
         """
         ast = parse_sql(sql)
         expected_ast = CreateKnowledgeBase(
@@ -183,7 +183,7 @@ class TestKB:
             model=Identifier(parts=["mindsdb", "my_embedding_model"]),
             storage=Identifier(parts=["my_vector_database", "some_table"]),
             from_select=None,
-            params={"some_param": "some value", "other_param": "other value"},
+            params={"some_param": "some value", "other_param": {'key': Variable('var1')}},
         )
         assert ast == expected_ast
 
