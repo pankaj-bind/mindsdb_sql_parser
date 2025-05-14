@@ -350,11 +350,7 @@ class MindsDBLexer(Lexer):
     def ignore_newline(self, t):
         self.lineno += len(t.value)
 
-    @_(r'@[a-zA-Z_.$]+',
-       r"@'[a-zA-Z_.$][^']*'",
-       r"@`[a-zA-Z_.$][^`]*`",
-       r'@"[a-zA-Z_.$][^"]*"'
-       )
+    @_(r'@(?:([a-zA-Z_$0-9]*[a-zA-Z_$]+[a-zA-Z_$0-9]*)|(?:`([^`]+)`))')
     def VARIABLE(self, t):
         t.value = t.value.lstrip('@')
 
@@ -366,11 +362,7 @@ class MindsDBLexer(Lexer):
             t.value = t.value.strip('`')
         return t
 
-    @_(r'@@[a-zA-Z_.$]+',
-       r"@@'[a-zA-Z_.$][^']*'",
-       r"@@`[a-zA-Z_.$][^`]*`",
-       r'@@"[a-zA-Z_.$][^"]*"'
-       )
+    @_(r'@@(?:([a-zA-Z_$0-9]*[a-zA-Z_$]+[a-zA-Z_$0-9]*)|(?:`([^`]+)`))')
     def SYSTEM_VARIABLE(self, t):
         t.value = t.value.lstrip('@')
 
