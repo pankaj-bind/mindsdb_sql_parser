@@ -37,3 +37,15 @@ class TestMDBParser:
         assert str(ast).lower() == sql.lower()
         assert str(ast) == str(expected_ast)
 
+    def test_mysql(self):
+        sql = 'select @@session.auto_increment_increment, @@character_set_client'
+        ast = parse_sql(sql)
+        expected_ast = Select(
+            targets=[
+                Variable('session.auto_increment_increment', is_system_var=True),
+                Variable('character_set_client', is_system_var=True),
+            ]
+        )
+
+        assert str(ast).lower() == sql.lower()
+        assert str(ast) == str(expected_ast)
