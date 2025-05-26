@@ -163,6 +163,7 @@ class EvaluateKnowledgeBase(ASTNode):
         llm: dict,
         save_to: Identifier,
         generate_data: dict = None,
+        params=None,
         *args,
         **kwargs):
         """
@@ -172,6 +173,7 @@ class EvaluateKnowledgeBase(ASTNode):
             llm: dict -- parameters for the LLM to use for evaluation.
             save_to: Identifier -- name of the table to save the results to.
             generate_data: dict -- parameters for generating data, if available.
+            params: dict -- additional parameters for the evaluation.
         """
         super().__init__(*args, **kwargs)
         self.name = name
@@ -179,6 +181,7 @@ class EvaluateKnowledgeBase(ASTNode):
         self.llm = llm
         self.save_to = save_to
         self.generate_data = generate_data
+        self.params = params if params is not None else {}
 
     def to_tree(self, *args, level=0, **kwargs):
         ind = indent(level)
@@ -189,7 +192,8 @@ class EvaluateKnowledgeBase(ASTNode):
         {ind}    test_table={self.test_table.to_string()},
         {ind}    llm={self.llm},
         {ind}    save_to={self.save_to.to_string()},
-        {generate_data_str}{ind})
+        {generate_data_str}{ind}    params={self.params}
+        {ind})
         """
         return out_str
 
@@ -202,6 +206,9 @@ class EvaluateKnowledgeBase(ASTNode):
 
         if self.generate_data:
             using_args.append(f"GENERATE_DATA={repr(self.generate_data)}")
+
+        if self.params:
+            using_args += [f"{k}={repr(v)}" for k, v in self.params.items()]
 
         using_str = "USING " + ", ".join(using_args)
 
