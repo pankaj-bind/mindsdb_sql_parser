@@ -154,7 +154,7 @@ class MindsDBParser(Parser):
     def evaluate_kb(self, p):
         return EvaluateKnowledgeBase(
             name=p.identifier,
-            params=p.kw_parameter_list
+            params={k.lower(): v for k, v in p.kw_parameter_list.items()}
         )
 
     # -- Skills --
