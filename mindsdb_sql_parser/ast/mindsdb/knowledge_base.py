@@ -156,61 +156,50 @@ class EvaluateKnowledgeBase(ASTNode):
     """
     Evaluate a knowledge base.
     """
-    def __init__(
-        self,
-        name: Identifier,
-        test_table: Identifier,
-        llm: dict,
-        save_to: Identifier,
-        generate_data: dict = None,
-        params=None,
-        *args,
-        **kwargs):
+    def __init__(self, name: str, params: dict = None, *args, **kwargs):
         """
         Args:
-            name: Identifier -- name of the knowledge base.
-            test_table: Identifier -- name of the table to use for testing.
-            llm: dict -- parameters for the LLM to use for evaluation.
-            save_to: Identifier -- name of the table to save the results to.
-            generate_data: dict -- parameters for generating data, if available.
-            params: dict -- additional parameters for the evaluation.
+            name: Identifier -- name of the knowledge base to evaluate.
+            params: dict -- parameters to pass to the evaluation.
         """
         super().__init__(*args, **kwargs)
         self.name = name
-        self.test_table = test_table
-        self.llm = llm
-        self.save_to = save_to
-        self.generate_data = generate_data
         self.params = params if params is not None else {}
 
     def to_tree(self, *args, level=0, **kwargs):
         ind = indent(level)
-        generate_data_str = f"{ind}generate_data={self.generate_data},\n" if self.generate_data else ""
-        out_str = f"""
-        {ind}EvaluateKnowledgeBase(
-        {ind}    name={self.name.to_string()},
-        {ind}    test_table={self.test_table.to_string()},
-        {ind}    llm={self.llm},
-        {ind}    save_to={self.save_to.to_string()},
-        {generate_data_str}{ind}    params={self.params}
-        {ind})
-        """
-        return out_str
+
+        param_str = ""
+        if self.params:
+            param_items = []
+            for k, v in self.params.items():
+                if isinstance(v, Identifier):
+                    param_items.append(f"{ind}    {k}={v.to_string()}")
+                else:
+                    param_items.append(f"{ind}    {k}={repr(v)}")
+            param_str = ",\n".join(param_items)
+
+        output_str = (
+            f"{ind}EvaluateKnowledgeBase(\n"
+            f"{ind}    name={self.name.to_string()},\n"
+            f"{param_str}\n"
+            f"{ind})"
+        )
+
+        return output_str
 
     def get_string(self, *args, **kwargs):
-        using_args = [
-            f"LLM={repr(self.llm)}",
-            f"TEST_TABLE={self.test_table.to_string()}",
-            f"SAVE_TO={self.save_to.to_string()}"
-        ]
-
-        if self.generate_data:
-            using_args.append(f"GENERATE_DATA={repr(self.generate_data)}")
+        using_str = ""
 
         if self.params:
-            using_args += [f"{k}={repr(v)}" for k, v in self.params.items()]
+            using_args = []
+            for k, v in self.params.items():
+                if isinstance(v, Identifier):
+                    using_args.append(f"{k}={v.to_string()}")
+                else:
+                    using_args.append(f"{k}={repr(v)}")
 
-        using_str = "USING " + ", ".join(using_args)
+            using_str = "USING " + ", ".join(using_args)
 
         output_str = (
             f"EVALUATE KNOWLEDGE_BASE {self.name.to_string()} "

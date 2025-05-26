@@ -152,15 +152,9 @@ class MindsDBParser(Parser):
 
     @_('EVALUATE KNOWLEDGE_BASE identifier USING kw_parameter_list')
     def evaluate_kb(self, p):
-        params = p.kw_parameter_list
-
         return EvaluateKnowledgeBase(
             name=p.identifier,
-            test_table=params.pop('test_table'),
-            llm=params.pop('llm'),
-            save_to= params.pop('save_to'),
-            generate_data=params.pop('generate_data'),
-            params=params
+            params=p.kw_parameter_list
         )
 
     # -- Skills --
