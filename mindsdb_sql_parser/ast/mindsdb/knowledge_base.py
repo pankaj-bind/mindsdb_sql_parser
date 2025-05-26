@@ -1,4 +1,5 @@
 from mindsdb_sql_parser.ast.base import ASTNode
+from mindsdb_sql_parser.ast import Identifier
 from mindsdb_sql_parser.utils import indent
 
 
@@ -106,6 +107,7 @@ class DropKnowledgeBase(ASTNode):
         out_str = f'DROP KNOWLEDGE_BASE {"IF EXISTS " if self.if_exists else ""}{self.name.to_string()}'
         return out_str
 
+
 class CreateKnowledgeBaseIndex(ASTNode):
     """
     Create a new index in the knowledge base
@@ -127,6 +129,7 @@ class CreateKnowledgeBaseIndex(ASTNode):
         out_str = f'CREATE INDEX ON KNOWLEDGE_BASE {self.name.to_string()}'
         return out_str
 
+
 class DropKnowledgeBaseIndex(ASTNode):
     """
     Delete an index in the knowledge base
@@ -147,3 +150,64 @@ class DropKnowledgeBaseIndex(ASTNode):
     def get_string(self, *args, **kwargs):
         out_str = f'DROP INDEX ON KNOWLEDGE_BASE {self.name.to_string()}'
         return out_str
+
+
+class EvaluateKnowledgeBase(ASTNode):
+    """
+    Evaluate a knowledge base.
+    """
+    def __init__(
+        self,
+        name: Identifier,
+        test_table: Identifier,
+        llm: dict,
+        save_to: Identifier,
+        generate_data: dict = None,
+        *args,
+        **kwargs):
+        """
+        Args:
+            name: Identifier -- name of the knowledge base.
+            test_table: Identifier -- name of the table to use for testing.
+            llm: dict -- parameters for the LLM to use for evaluation.
+            save_to: Identifier -- name of the table to save the results to.
+            generate_data: dict -- parameters for generating data, if available.
+        """
+        super().__init__(*args, **kwargs)
+        self.name = name
+        self.test_table = test_table
+        self.llm = llm
+        self.save_to = save_to
+        self.generate_data = generate_data
+
+    def to_tree(self, *args, level=0, **kwargs):
+        ind = indent(level)
+        generate_data_str = f"{ind}generate_data={self.generate_data},\n" if self.generate_data else ""
+        out_str = f"""
+        {ind}EvaluateKnowledgeBase(
+        {ind}    name={self.name.to_string()},
+        {ind}    test_table={self.test_table.to_string()},
+        {ind}    llm={self.llm},
+        {ind}    save_to={self.save_to.to_string()},
+        {generate_data_str}{ind})
+        """
+        return out_str
+
+    def get_string(self, *args, **kwargs):
+        using_args = [
+            f"LLM={repr(self.llm)}",
+            f"TEST_TABLE={self.test_table.to_string()}",
+            f"SAVE_TO={self.save_to.to_string()}"
+        ]
+
+        if self.generate_data:
+            using_args.append(f"GENERATE_DATA={repr(self.generate_data)}")
+
+        using_str = "USING " + ", ".join(using_args)
+
+        output_str = (
+            f"EVALUATE KNOWLEDGE_BASE {self.name.to_string()} "
+            f"{using_str}"
+        )
+
+        return output_str.strip()
