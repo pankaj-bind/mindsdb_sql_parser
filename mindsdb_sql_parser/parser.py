@@ -723,6 +723,7 @@ class MindsDBParser(Parser):
     @_('id id',
        'id id DEFAULT id',
        'id id PRIMARY_KEY',
+       'id id LPAREN INTEGER RPAREN PRIMARY_KEY',
        'id id LPAREN INTEGER RPAREN',
        'id id LPAREN INTEGER COMMA INTEGER RPAREN',
        'id id LPAREN INTEGER RPAREN DEFAULT id',
