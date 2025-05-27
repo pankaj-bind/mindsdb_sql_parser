@@ -156,7 +156,7 @@ class EvaluateKnowledgeBase(ASTNode):
     """
     Evaluate a knowledge base.
     """
-    def __init__(self, name: str, params: dict = None, *args, **kwargs):
+    def __init__(self, name: Identifier, params: dict = None, *args, **kwargs):
         """
         Args:
             name: Identifier -- name of the knowledge base to evaluate.
