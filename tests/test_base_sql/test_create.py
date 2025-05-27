@@ -130,6 +130,26 @@ class TestCreateMindsdb:
         assert str(ast).lower() == str(expected_ast).lower()
         assert ast.to_tree() == expected_ast.to_tree()
 
+        sql = f'''
+         CREATE TABLE mydb.Persons(
+            Person varchar(10) PRIMARY KEY not null,
+            name TEXT NULL   
+         )
+        '''
+        ast = parse_sql(sql)
+
+        expected_ast = CreateTable(
+            name=Identifier('mydb.Persons'),
+            columns=[
+                TableColumn(name='Person', type='varchar', length=10, is_primary_key=True, nullable=False),
+                TableColumn(name='name', type='TEXT', nullable=True),
+            ]
+        )
+
+        assert str(ast).lower() == str(expected_ast).lower()
+        assert ast.to_tree() == expected_ast.to_tree()
+
+
         # multiple primary keys
 
         sql = f'''
