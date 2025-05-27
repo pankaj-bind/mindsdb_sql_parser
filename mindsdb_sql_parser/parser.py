@@ -17,7 +17,7 @@ from mindsdb_sql_parser.ast.mindsdb.trigger import CreateTrigger, DropTrigger
 from mindsdb_sql_parser.ast.mindsdb.latest import Latest
 from mindsdb_sql_parser.ast.mindsdb.evaluate import Evaluate
 from mindsdb_sql_parser.ast.mindsdb.knowledge_base import CreateKnowledgeBase, DropKnowledgeBase, \
-    CreateKnowledgeBaseIndex, DropKnowledgeBaseIndex
+    CreateKnowledgeBaseIndex, DropKnowledgeBaseIndex, EvaluateKnowledgeBase
 from mindsdb_sql_parser.ast.mindsdb.skills import CreateSkill, DropSkill, UpdateSkill
 from mindsdb_sql_parser.exceptions import ParsingException
 from mindsdb_sql_parser.ast.mindsdb.retrain_predictor import RetrainPredictor
@@ -89,6 +89,7 @@ class MindsDBParser(Parser):
        'drop_trigger',
        'create_kb',
        'drop_kb',
+       'evaluate_kb',
        'create_skill',
        'drop_skill',
        'update_skill',
@@ -148,6 +149,13 @@ class MindsDBParser(Parser):
     @_('DROP KNOWLEDGE_BASE if_exists_or_empty identifier')
     def drop_kb(self, p):
         return DropKnowledgeBase(name=p.identifier, if_exists=p.if_exists_or_empty)
+
+    @_('EVALUATE KNOWLEDGE_BASE identifier USING kw_parameter_list')
+    def evaluate_kb(self, p):
+        return EvaluateKnowledgeBase(
+            name=p.identifier,
+            params={k.lower(): v for k, v in p.kw_parameter_list.items()}
+        )
 
     # -- Skills --
     @_('CREATE SKILL if_not_exists_or_empty identifier USING kw_parameter_list')

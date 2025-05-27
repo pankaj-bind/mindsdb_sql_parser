@@ -1,4 +1,5 @@
 from mindsdb_sql_parser.ast.base import ASTNode
+from mindsdb_sql_parser.ast import Identifier
 from mindsdb_sql_parser.utils import indent
 
 
@@ -106,6 +107,7 @@ class DropKnowledgeBase(ASTNode):
         out_str = f'DROP KNOWLEDGE_BASE {"IF EXISTS " if self.if_exists else ""}{self.name.to_string()}'
         return out_str
 
+
 class CreateKnowledgeBaseIndex(ASTNode):
     """
     Create a new index in the knowledge base
@@ -127,6 +129,7 @@ class CreateKnowledgeBaseIndex(ASTNode):
         out_str = f'CREATE INDEX ON KNOWLEDGE_BASE {self.name.to_string()}'
         return out_str
 
+
 class DropKnowledgeBaseIndex(ASTNode):
     """
     Delete an index in the knowledge base
@@ -147,3 +150,60 @@ class DropKnowledgeBaseIndex(ASTNode):
     def get_string(self, *args, **kwargs):
         out_str = f'DROP INDEX ON KNOWLEDGE_BASE {self.name.to_string()}'
         return out_str
+
+
+class EvaluateKnowledgeBase(ASTNode):
+    """
+    Evaluate a knowledge base.
+    """
+    def __init__(self, name: Identifier, params: dict = None, *args, **kwargs):
+        """
+        Args:
+            name: Identifier -- name of the knowledge base to evaluate.
+            params: dict -- parameters to pass to the evaluation.
+        """
+        super().__init__(*args, **kwargs)
+        self.name = name
+        self.params = params if params is not None else {}
+
+    def to_tree(self, *args, level=0, **kwargs):
+        ind = indent(level)
+
+        param_str = ""
+        if self.params:
+            param_items = []
+            for k, v in self.params.items():
+                if isinstance(v, Identifier):
+                    param_items.append(f"{ind}    {k}={v.to_string()}")
+                else:
+                    param_items.append(f"{ind}    {k}={repr(v)}")
+            param_str = ",\n".join(param_items)
+
+        output_str = (
+            f"{ind}EvaluateKnowledgeBase(\n"
+            f"{ind}    name={self.name.to_string()},\n"
+            f"{param_str}\n"
+            f"{ind})"
+        )
+
+        return output_str
+
+    def get_string(self, *args, **kwargs):
+        using_str = ""
+
+        if self.params:
+            using_args = []
+            for k, v in self.params.items():
+                if isinstance(v, Identifier):
+                    using_args.append(f"{k}={v.to_string()}")
+                else:
+                    using_args.append(f"{k}={repr(v)}")
+
+            using_str = "USING " + ", ".join(using_args)
+
+        output_str = (
+            f"EVALUATE KNOWLEDGE_BASE {self.name.to_string()} "
+            f"{using_str}"
+        )
+
+        return output_str.strip()
