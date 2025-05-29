@@ -35,7 +35,7 @@ class TestViews:
         assert ast.to_tree() == expected_ast.to_tree()
 
     def test_alter_view_full(self):
-        sql = "ALTER VIEW my_view AS ( SELECT * FROM pred ) FROM integr"
+        sql = "ALTER VIEW my_view FROM integr AS ( SELECT * FROM pred )"
         ast = parse_sql(sql)
         expected_ast = AlterView(
             name=Identifier('my_view'),

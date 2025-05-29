@@ -693,8 +693,8 @@ class MindsDBParser(Parser):
                           if_not_exists=p.if_not_exists_or_empty)
 
     # ALTER VIEW
-    @_('ALTER VIEW identifier AS LPAREN raw_query RPAREN create_view_from_table_or_nothing',
-       'ALTER VIEW identifier LPAREN raw_query RPAREN create_view_from_table_or_nothing')
+    @_('ALTER VIEW identifier create_view_from_table_or_nothing AS LPAREN raw_query RPAREN',
+       'ALTER VIEW identifier create_view_from_table_or_nothing LPAREN raw_query RPAREN')
     def alter_view(self, p):
         query_str = tokens_to_string(p.raw_query)
 

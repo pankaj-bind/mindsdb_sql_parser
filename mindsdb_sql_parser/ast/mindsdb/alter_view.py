@@ -42,8 +42,8 @@ class AlterView(ASTNode):
         return out_str
     
     def get_string(self, *args, **kwargs):
-        from_str = f' FROM {str(self.from_table)} ' if self.from_table else ''
+        from_str = f' FROM {str(self.from_table)}' if self.from_table else ''
 
-        out_str = f'ALTER VIEW {self.name.to_string()} AS ( {self.query_str} ){from_str}'
+        out_str = f'ALTER VIEW {self.name.to_string()}{from_str} AS ( {self.query_str} )'
 
         return out_str
