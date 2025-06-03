@@ -350,7 +350,7 @@ class MindsDBParser(Parser):
        'DROP SCHEMA if_exists_or_empty identifier')
     def drop_database(self, p):
         return DropDatabase(name=p.identifier, if_exists=p.if_exists_or_empty)
-    
+
     # ALTER DATABASE
     @_('ALTER DATABASE identifier kw_parameter_list')
     def alter_database(self, p):
