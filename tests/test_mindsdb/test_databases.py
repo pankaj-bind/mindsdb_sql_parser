@@ -135,7 +135,7 @@ class TestDatabases:
         sql = "ALTER DATABASE db PARAMETERS = {'A': 1, 'B': 2}"
         ast = parse_sql(sql)
 
-        expected_ast = AlterDatabase(name=Identifier('db'), altered_params={'A': 1, 'B': 2})
+        expected_ast = AlterDatabase(name=Identifier('db'), altered_params={'parameters': {'A': 1, 'B': 2}})
 
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()
