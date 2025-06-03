@@ -1,6 +1,7 @@
 from sly import Parser
 from mindsdb_sql_parser.ast import *
 from mindsdb_sql_parser.ast.drop import DropDatabase, DropView
+from mindsdb_sql_parser.ast.mindsdb.alter_database import AlterDatabase
 from mindsdb_sql_parser.ast.mindsdb.agents import CreateAgent, DropAgent, UpdateAgent
 from mindsdb_sql_parser.ast.mindsdb.drop_datasource import DropDatasource
 from mindsdb_sql_parser.ast.mindsdb.drop_predictor import DropPredictor
@@ -349,6 +350,15 @@ class MindsDBParser(Parser):
        'DROP SCHEMA if_exists_or_empty identifier')
     def drop_database(self, p):
         return DropDatabase(name=p.identifier, if_exists=p.if_exists_or_empty)
+    
+    # ALTER DATABASE
+    @_('ALTER DATABASE identifier kw_parameter_list')
+    def alter_database(self, p):
+        params = {k.lower(): v for k, v in p.kw_parameter_list.items()}
+        return AlterDatabase(
+            name=p.identifier,
+            altered_params=params
+        )
 
     # Transactions
 
