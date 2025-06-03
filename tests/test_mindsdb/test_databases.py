@@ -6,7 +6,7 @@ from mindsdb_sql_parser.ast.mindsdb import *
 from mindsdb_sql_parser.lexer import MindsDBLexer
 
 
-class TestCreateDatabase:
+class TestDatabases:
     def test_create_database_lexer(self):
         sql = "CREATE DATABASE IF NOT EXISTS db WITH ENGINE = 'mysql', PARAMETERS = {\"user\": \"admin\", \"password\": \"admin\"}"
         tokens = list(MindsDBLexer().tokenize(sql))
@@ -130,3 +130,12 @@ class TestCreateDatabase:
         assert str(ast).lower() == str(expected_ast).lower()
         assert ast.to_tree() == expected_ast.to_tree()
 
+
+    def test_alter_database(self):
+        sql = "ALTER DATABASE db PARAMETERS = {'A': 1, 'B': 2}"
+        ast = parse_sql(sql)
+
+        expected_ast = AlterDatabase(name=Identifier('db'), altered_params={'parameters': {'A': 1, 'B': 2}})
+
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()

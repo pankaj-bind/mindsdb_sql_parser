@@ -1,4 +1,5 @@
 from .agents import CreateAgent, DropAgent, UpdateAgent
+from .alter_database import AlterDatabase
 from .create_view import CreateView
 from .create_database import CreateDatabase
 from .create_predictor import CreatePredictor, CreateAnomalyDetectionModel
