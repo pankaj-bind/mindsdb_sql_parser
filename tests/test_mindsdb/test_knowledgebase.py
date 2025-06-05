@@ -1,3 +1,4 @@
+from mindsdb_sql_parser.ast.mindsdb.knowledge_base import *
 from mindsdb_sql_parser import parse_sql, Variable
 from mindsdb_sql_parser.ast.mindsdb.knowledge_base import (
     CreateKnowledgeBase,
@@ -369,5 +370,40 @@ class TestKB:
                     args=[Identifier("metadata.some_column"), Constant("some value")],
                 ),
             ),
+        )
+        assert ast == expected_ast
+
+    def test_evaluate_knowledge_base(self):
+        sql = """
+            EVALUATE KNOWLEDGE_BASE my_knowledge_base
+            USING
+                TEST_TABLE = my_database.some_table_1,
+                SAVE_TO = my_database.some_table_2,
+                LLM = {
+                    "provider": "openai",
+                    "model": "gpt-3.5-turbo",
+                    "api_key": "my_api_key"
+                },
+                GENERATE_DATA = {
+                    "from_sql": "SELECT content FROM my_database.some_table",
+                    "count": 100
+                }
+        """
+        ast = parse_sql(sql)
+        expected_ast = EvaluateKnowledgeBase(
+            name=Identifier("my_knowledge_base"),
+            params={
+                "test_table": Identifier(parts=["my_database", "some_table_1"]),
+                "save_to": Identifier(parts=["my_database", "some_table_2"]),
+                "llm": {
+                    "provider": "openai",
+                    "model": "gpt-3.5-turbo",
+                    "api_key": "my_api_key"
+                },
+                "generate_data": {
+                    "from_sql": "SELECT content FROM my_database.some_table",
+                    "count": 100
+                }
+            }
         )
         assert ast == expected_ast
