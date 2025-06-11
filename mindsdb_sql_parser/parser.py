@@ -1069,10 +1069,13 @@ class MindsDBParser(Parser):
     @_('select INTERSECT select',
        'union INTERSECT select',
        'select INTERSECT ALL select',
-       'union INTERSECT ALL select')
+       'union INTERSECT ALL select',
+       'select INTERSECT DISTINCT select',
+       'union INTERSECT DISTINCT select')
     def union(self, p):
         unique = not hasattr(p, 'ALL')
-        return Intersect(left=p[0], right=p[2] if unique else p[3], unique=unique)
+        return Intersect(left=p[0], right=p[-1], unique=unique)
+
     @_('select EXCEPT select',
        'union EXCEPT select',
        'select EXCEPT ALL select',
