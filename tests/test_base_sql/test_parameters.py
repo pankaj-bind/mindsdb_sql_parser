@@ -14,7 +14,7 @@ class TestParameters:
             ])
         )
         assert ast.to_tree() == expected_ast.to_tree()
-        assert str(ast) == str(expected_ast)
+        assert str(ast) == sql
 
     def test_select_multiple_parameters(self):
         sql = "SELECT * FROM tbl WHERE col1 > ? AND col2 = ?"
@@ -34,10 +34,10 @@ class TestParameters:
             ])
         )
         assert ast.to_tree() == expected_ast.to_tree()
-        assert str(ast) == str(expected_ast)
+        assert str(ast) == sql
 
     def test_insert_with_parameters(self):
-        sql = "INSERT INTO tbl_name(a, c) VALUES (?, ?)"
+        sql = "INSERT INTO tbl_name (a, c) VALUES (?, ?)"
         ast = parse_sql(sql)
         expected_ast = Insert(
             table=Identifier('tbl_name'),
@@ -47,7 +47,7 @@ class TestParameters:
             ]
         )
         assert ast.to_tree() == expected_ast.to_tree()
-        assert str(ast) == str(expected_ast)
+        assert str(ast) == sql
 
     def test_insert_with_multiple_parameter_rows(self):
         sql = "INSERT INTO tbl_name VALUES (?, ?), (?, ?)"
@@ -60,7 +60,7 @@ class TestParameters:
             ]
         )
         assert ast.to_tree() == expected_ast.to_tree()
-        assert str(ast) == str(expected_ast)
+        assert str(ast) == sql
         
     def test_select_parameter_as_target(self):
         sql = "SELECT ?"
@@ -69,4 +69,4 @@ class TestParameters:
             targets=[Parameter('?')]
         )
         assert ast.to_tree() == expected_ast.to_tree()
-        assert str(ast) == str(expected_ast)
+        assert str(ast) == sql
