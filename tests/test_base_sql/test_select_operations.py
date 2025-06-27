@@ -1,6 +1,6 @@
 import pytest
 
-from mindsdb_sql_parser import parse_sql
+from mindsdb_sql_parser import parse_sql, ParsingException
 from mindsdb_sql_parser.ast import *
 
 
@@ -635,3 +635,8 @@ class TestOperationsMindsdb:
             )
 
             assert str(ast) == str(expected_ast)
+
+    def test_not(self):
+        sql = 'SELECT * from movies where genre not null'
+        with pytest.raises(ParsingException):
+            parse_sql(sql)

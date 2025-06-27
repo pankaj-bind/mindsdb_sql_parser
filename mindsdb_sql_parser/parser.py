@@ -1642,7 +1642,6 @@ class MindsDBParser(Parser):
        'expr AND expr',
        'expr OR expr',
        'expr IS_NOT expr',
-       'expr NOT expr',
        'expr IS expr',
        'expr LIKE expr',
        'expr NOT_LIKE expr',
