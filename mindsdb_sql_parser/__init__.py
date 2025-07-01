@@ -49,7 +49,11 @@ class ErrorHandling:
             else:
                 line = line.ljust(token.index)
 
-            line += token.value
+            if token.type == 'VARIABLE':
+                line += f'@{token.value}'
+            else:
+                line += token.value
+
             lines_idx[token.lineno] = line
 
         msgs = []
