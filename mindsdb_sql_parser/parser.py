@@ -1633,6 +1633,8 @@ class MindsDBParser(Parser):
        'expr MODULO expr',
        'expr EQUALS expr',
        'expr NEQUALS expr',
+       'expr RIGHT_SHIFT expr',
+       'expr LEFT_SHIFT expr',
        'expr GEQ expr',
        'expr GREATER expr',
        'expr GEQ LAST',

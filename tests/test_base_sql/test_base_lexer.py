@@ -120,6 +120,8 @@ class TestLexer:
             ('>=', 'GEQ'),
             ('<', 'LESS'),
             ('<=', 'LEQ'),
+            ('>>', 'RIGHT_SHIFT'),
+            ('<<', 'LEFT_SHIFT'),
             ('AND', 'AND'),
             ('OR', 'OR'),
             ('IS', 'IS'),
