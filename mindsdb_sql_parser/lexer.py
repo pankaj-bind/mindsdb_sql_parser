@@ -272,6 +272,9 @@ class MindsDBLexer(Lexer):
     LPAREN = r'\('
     RPAREN = r'\)'
     PARAMETER = r'\?'
+
+    ASSIGN_COLON = r':='
+
     # json
     LBRACE = r'\{'
     RBRACE = r'\}'
@@ -298,7 +301,6 @@ class MindsDBLexer(Lexer):
     MODULO = r'%'
     BIT_AND = r'&'
     BIT_XOR = r'\^'
-    ASSIGN_COLON = r':='
     RIGHT_SHIFT = r'>>'
     LEFT_SHIFT = r'<<'
     EQUALS = r'='
