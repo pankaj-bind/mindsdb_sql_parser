@@ -71,7 +71,7 @@ class MindsDBLexer(Lexer):
         LBRACE, RBRACE, LBRACKET, RBRACKET, COLON, SEMICOLON,
 
         # Operators
-        PLUS, MINUS, MATCH, NOT_MATCH, DIVIDE, MODULO,
+        PLUS, MINUS, MATCH, NOT_MATCH, DIVIDE, MODULO, BIT_AND, BIT_OR, BIT_XOR,
         ASSIGN_COLON, RIGHT_SHIFT, LEFT_SHIFT, EQUALS, NEQUALS, GREATER, GEQ, LESS, LEQ,
         AND, OR, NOT, IS, IS_NOT, TYPECAST,
         IN, NOT_IN, LIKE, NOT_LIKE, CONCAT, BETWEEN, WINDOW, OVER, PARTITION_BY,
@@ -296,6 +296,9 @@ class MindsDBLexer(Lexer):
     NOT_MATCH = r'!~'
     DIVIDE = r'/'
     MODULO = r'%'
+    BIT_AND = r'&'
+    BIT_OR = r'\|'
+    BIT_XOR = r'\^'
     ASSIGN_COLON = r':='
     RIGHT_SHIFT = r'>>'
     LEFT_SHIFT = r'<<'

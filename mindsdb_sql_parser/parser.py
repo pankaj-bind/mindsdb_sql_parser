@@ -50,6 +50,7 @@ class MindsDBParser(Parser):
         ('nonassoc', LESS, LEQ, GREATER, GEQ, IN, NOT_IN, BETWEEN, IS, IS_NOT, NOT_LIKE, LIKE, RIGHT_SHIFT, LEFT_SHIFT),
         ('left', JSON_GET),
         ('left', PLUS, MINUS),
+        ('left', BIT_AND, BIT_XOR, BIT_OR),
         ('left', STAR, DIVIDE, TYPECAST, MODULO),
         ('right', UMINUS),  # Unary minus operator, unary not
 
@@ -1631,6 +1632,9 @@ class MindsDBParser(Parser):
        'expr STAR expr',
        'expr DIVIDE expr',
        'expr MODULO expr',
+       'expr BIT_AND expr',
+       'expr BIT_XOR expr',
+       'expr BIT_OR expr',
        'expr ASSIGN_COLON expr',
        'expr EQUALS expr',
        'expr NEQUALS expr',
