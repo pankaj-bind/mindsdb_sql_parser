@@ -71,8 +71,8 @@ class MindsDBLexer(Lexer):
         LBRACE, RBRACE, LBRACKET, RBRACKET, COLON, SEMICOLON,
 
         # Operators
-        PLUS, MINUS, MATCH, NOT_MATCH, DIVIDE, MODULO,
-        EQUALS, NEQUALS, GREATER, GEQ, LESS, LEQ,
+        PLUS, MINUS, MATCH, NOT_MATCH, DIVIDE, MODULO, BIT_AND, BIT_OR, BIT_XOR,
+        ASSIGN_COLON, RIGHT_SHIFT, LEFT_SHIFT, EQUALS, NEQUALS, GREATER, GEQ, LESS, LEQ,
         AND, OR, NOT, IS, IS_NOT, TYPECAST,
         IN, NOT_IN, LIKE, NOT_LIKE, CONCAT, BETWEEN, WINDOW, OVER, PARTITION_BY,
         VECT_L2, VECT_L1, VECT_INNER, VECT_COS, VECT_HAMM, VECT_JACC,
@@ -272,6 +272,9 @@ class MindsDBLexer(Lexer):
     LPAREN = r'\('
     RPAREN = r'\)'
     PARAMETER = r'\?'
+
+    ASSIGN_COLON = r':='
+
     # json
     LBRACE = r'\{'
     RBRACE = r'\}'
@@ -296,6 +299,10 @@ class MindsDBLexer(Lexer):
     NOT_MATCH = r'!~'
     DIVIDE = r'/'
     MODULO = r'%'
+    BIT_AND = r'&'
+    BIT_XOR = r'\^'
+    RIGHT_SHIFT = r'>>'
+    LEFT_SHIFT = r'<<'
     EQUALS = r'='
     NEQUALS = r'(!=|<>)'
     GEQ = r'>='
@@ -313,6 +320,7 @@ class MindsDBLexer(Lexer):
     IN = r'\bIN\b'
     CAST = r'\bCAST\b'
     CONCAT = r'\|\|'
+    BIT_OR = r'\|'
     BETWEEN = r'\bBETWEEN\b'
     INTERVAL = r'\bINTERVAL\b'
     WINDOW = r'\bWINDOW\b'

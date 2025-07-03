@@ -6,8 +6,8 @@ from mindsdb_sql_parser.ast import *
 
 class TestOperations:
     def test_select_binary_operations(self):
-        for op in ['+', '-', '/', '*', '%', '=', '!=', '>', '<', '>=', '<=',
-                   'is', 'IS NOT', 'like', 'in', 'and', 'or', '||']:
+        for op in ['+', '-', '/', '*', '%', '=', '!=', '>', '<', '>=', '<=', '>>', '<<',
+                   'is', 'IS NOT', 'like', 'in', 'and', 'or', '||', '&', '|', '^']:
             sql = f'SELECT column1 {op.upper()} column2 FROM tab'
             ast = parse_sql(sql)
 

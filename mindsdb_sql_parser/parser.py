@@ -46,10 +46,11 @@ class MindsDBParser(Parser):
         ('left', OR),
         ('left', AND),
         ('right', UNOT),
-        ('left', EQUALS, NEQUALS),
-        ('nonassoc', LESS, LEQ, GREATER, GEQ, IN, NOT_IN, BETWEEN, IS, IS_NOT, NOT_LIKE, LIKE),
+        ('left', EQUALS, NEQUALS, ASSIGN_COLON),
+        ('nonassoc', LESS, LEQ, GREATER, GEQ, IN, NOT_IN, BETWEEN, IS, IS_NOT, NOT_LIKE, LIKE, RIGHT_SHIFT, LEFT_SHIFT),
         ('left', JSON_GET),
         ('left', PLUS, MINUS),
+        ('left', BIT_AND, BIT_XOR, BIT_OR),
         ('left', STAR, DIVIDE, TYPECAST, MODULO),
         ('right', UMINUS),  # Unary minus operator, unary not
 
@@ -1631,8 +1632,14 @@ class MindsDBParser(Parser):
        'expr STAR expr',
        'expr DIVIDE expr',
        'expr MODULO expr',
+       'expr BIT_AND expr',
+       'expr BIT_XOR expr',
+       'expr BIT_OR expr',
+       'expr ASSIGN_COLON expr',
        'expr EQUALS expr',
        'expr NEQUALS expr',
+       'expr RIGHT_SHIFT expr',
+       'expr LEFT_SHIFT expr',
        'expr GEQ expr',
        'expr GREATER expr',
        'expr GEQ LAST',
@@ -1657,6 +1664,10 @@ class MindsDBParser(Parser):
        'expr NOT_IN expr',
        'expr IN expr',)
     def expr(self, p):
+        if p[1] == ':=':
+            # allow 'assign' only for variables
+            if not isinstance(p[0], Variable):
+                raise ParsingException("Assignment `:=` allowed only to variables (@var := ...)")
         if hasattr(p, 'LAST'):
             arg1 = Last()
         else:

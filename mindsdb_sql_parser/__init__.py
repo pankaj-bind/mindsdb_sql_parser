@@ -13,7 +13,8 @@ class ErrorHandling:
         self.parser = parser
         self.lexer = lexer
 
-    def process(self, error_info):
+    def process(self) -> str:
+        error_info = self.parser.error_info
         self.tokens = [t for t in error_info['tokens'] if t is not None]
         self.bad_token = error_info['bad_token']
         self.expected_tokens = error_info['expected_tokens']
@@ -48,7 +49,11 @@ class ErrorHandling:
             else:
                 line = line.ljust(token.index)
 
-            line += token.value
+            if token.type == 'VARIABLE':
+                line += f'@{token.value}'
+            else:
+                line += token.value
+
             lines_idx[token.lineno] = line
 
         msgs = []
@@ -175,7 +180,7 @@ def parse_sql(sql, dialect=None):
     if ast is None:
 
         eh = ErrorHandling(lexer, parser)
-        message = eh.process(parser.error_info)
+        message = eh.process()
 
         raise ParsingException(message)
 
