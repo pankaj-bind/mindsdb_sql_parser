@@ -91,6 +91,9 @@ class Identifier(ASTNode):
         identifier = Identifier(parts=copy(self.parts))
         identifier.alias = deepcopy(self.alias)
         identifier.parentheses = self.parentheses
+        identifier.is_quoted = deepcopy(self.is_quoted)
+        identifier.is_outer = self.is_outer
+        identifier.with_rollup = self.with_rollup
         if hasattr(self, 'sub_select'):
             identifier.sub_select = deepcopy(self.sub_select)
         return identifier
@@ -99,6 +102,9 @@ class Identifier(ASTNode):
         identifier = Identifier(parts=copy(self.parts))
         identifier.alias = deepcopy(self.alias)
         identifier.parentheses = self.parentheses
+        identifier.is_quoted = deepcopy(self.is_quoted)
+        identifier.is_outer = self.is_outer
+        identifier.with_rollup = self.with_rollup
         if hasattr(self, 'sub_select'):
             identifier.sub_select = deepcopy(self.sub_select)
         return identifier
