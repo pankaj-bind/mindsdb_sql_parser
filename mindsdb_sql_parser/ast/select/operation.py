@@ -6,9 +6,15 @@ from mindsdb_sql_parser.utils import indent
 class Operation(ASTNode):
     def __init__(self, op, args, *args_, **kwargs):
         super().__init__(*args_, **kwargs)
+        from mindsdb_sql_parser.ast import Tuple
 
         self.op = ' '.join(op.lower().split())
-        self.args = list(args)
+        self.args = []
+        for item in args:
+            if isinstance(item, ASTNode) and item.parentheses:
+                item.parentheses = False
+                item = Tuple([item])
+            self.args.append(item)
         self.assert_arguments()
 
     def assert_arguments(self):
