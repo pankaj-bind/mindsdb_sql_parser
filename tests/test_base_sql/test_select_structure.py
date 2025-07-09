@@ -714,9 +714,10 @@ class TestSelectStructure:
         sql = "SELECT `name`, `status` FROM `mindsdb`.`wow stuff predictors`.`even-dashes-work`.`nice`"
         ast = parse_sql(sql)
 
-        expected_ast = Select(targets=[Identifier(parts=['name']), Identifier(parts=['status'])],
-                              from_table=Identifier(parts=['mindsdb', 'wow stuff predictors', 'even-dashes-work', 'nice']),
-                              )
+        expected_ast = Select(
+            targets=[Identifier('`name`'), Identifier('`status`')],
+            from_table=Identifier('`mindsdb`.`wow stuff predictors`.`even-dashes-work`.`nice`'),
+        )
 
         assert ast.to_tree() == expected_ast.to_tree()
         assert str(ast) == str(expected_ast)

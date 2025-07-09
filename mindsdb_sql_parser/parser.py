@@ -1823,17 +1823,21 @@ class MindsDBParser(Parser):
        'identifier DOT star')
     def identifier(self, p):
         node = p[0]
-        is_quoted = False
         if isinstance(p[2], Star):
             node.parts.append(p[2])
+            node.is_quoted.append(False)
         elif isinstance(p[2], int):
             node.parts.append(str(p[2]))
+            node.is_quoted.append(False)
         elif isinstance(p[2], str):
             node.parts.append(p[2])
+            node.is_quoted.append(False)
+        elif isinstance(p[2], Identifier):
+            node.append(p[2])
         else:
-            node.parts += p[2].parts
-            is_quoted = p[2].is_quoted[0]
-        node.is_quoted.append(is_quoted)
+            # fallback, shouldn't happen
+            node.parts.append(str(p[2]))
+            node.is_quoted.append(False)
         return node
 
     @_('quote_string',
