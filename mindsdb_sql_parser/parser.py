@@ -537,7 +537,7 @@ class MindsDBParser(Parser):
         value0 = command.from_table
         value1 = p.identifier
         if value0 is not None:
-            value1.parts = value1.parts + value0.parts
+            value1.append(value0)
 
         command.from_table = value1
         return command
@@ -548,7 +548,7 @@ class MindsDBParser(Parser):
         value0 = command.in_table
         value1 = p.identifier
         if value0 is not None:
-            value1.parts = value1.parts + value0.parts
+            value1.append(value0)
 
         command.in_table = value1
         return command

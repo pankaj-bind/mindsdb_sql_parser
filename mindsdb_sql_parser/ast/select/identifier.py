@@ -69,6 +69,10 @@ class Identifier(ASTNode):
         parts, _ = path_str_to_parts(value)
         return Identifier(parts=parts, *args, **kwargs)
 
+    def append(self, other: "Identifier") -> None:
+        self.parts += other.parts
+        self.is_quoted += other.is_quoted
+
     def parts_to_str(self):
         out_parts = []
         reserved_words = get_reserved_words()
