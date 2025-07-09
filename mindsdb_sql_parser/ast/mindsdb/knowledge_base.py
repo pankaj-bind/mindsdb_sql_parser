@@ -13,6 +13,7 @@ class CreateKnowledgeBase(ASTNode):
         model=None,
         storage=None,
         from_select=None,
+        from_select_alias=None,
         params=None,
         if_not_exists=False,
         *args,
@@ -24,6 +25,7 @@ class CreateKnowledgeBase(ASTNode):
             model: Identifier -- name of the model to use
             storage: Identifier -- name of the storage to use
             from_select: SelectStatement -- select statement to use as the source of the knowledge base
+            from_select_alias: Identifier -- alias for the from_select subquery
             params: dict -- additional parameters to pass to the knowledge base. E.g., chunking strategy, etc.
             if_not_exists: bool -- if True, do not raise an error if the knowledge base already exists
         """
@@ -34,25 +36,29 @@ class CreateKnowledgeBase(ASTNode):
         self.params = params
         self.if_not_exists = if_not_exists
         self.from_query = from_select
+        self.from_query_alias = from_select_alias
 
     def to_tree(self, *args, level=0, **kwargs):
         ind = indent(level)
         storage_str = f"{ind} storage={self.storage.to_string()},\n" if self.storage else ""
         model_str = f"{ind} model={self.model.to_string()},\n" if self.model else ""
+        from_query_alias_str = f"{ind} from_query_alias={self.from_query_alias.to_string()},\n" if self.from_query_alias else ""
         out_str = f"""
         {ind}CreateKnowledgeBase(
         {ind}    if_not_exists={self.if_not_exists},
         {ind}    name={self.name.to_string()},
         {ind}    from_query={self.from_query.to_tree(level=level + 1) if self.from_query else None},
-        {model_str}{storage_str}{ind}    params={self.params}
+        {from_query_alias_str}{model_str}{storage_str}{ind}    params={self.params}
         {ind})
         """
         return out_str
 
     def get_string(self, *args, **kwargs):
-        from_query_str = (
-            f"FROM ({self.from_query.get_string()})" if self.from_query else ""
-        )
+        from_query_str = ""
+        if self.from_query:
+            alias_str = f" AS {self.from_query_alias.to_string()}" if self.from_query_alias else ""
+            from_query_str = f"FROM ({self.from_query.get_string()}){alias_str}"
+
 
         using_ar = []
         if self.storage:
@@ -74,10 +80,7 @@ class CreateKnowledgeBase(ASTNode):
             f"{using_str}"
         )
 
-        return out_str
-
-    def __repr__(self) -> str:
-        return self.to_tree()
+        return out_str.strip()
 
 
 class DropKnowledgeBase(ASTNode):

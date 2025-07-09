@@ -111,25 +111,32 @@ class MindsDBParser(Parser):
     @_(
         'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier USING kw_parameter_list',
         'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier',
-        # from select
+        'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier FROM LPAREN select RPAREN AS identifier USING kw_parameter_list',
+        'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier FROM LPAREN select RPAREN identifier USING kw_parameter_list',
+        'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier FROM LPAREN select RPAREN AS identifier',
+        'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier FROM LPAREN select RPAREN identifier',
         'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier FROM LPAREN select RPAREN USING kw_parameter_list',
         'CREATE KNOWLEDGE_BASE if_not_exists_or_empty identifier FROM LPAREN select RPAREN',
     )
     def create_kb(self, p):
         params = getattr(p, 'kw_parameter_list', {})
         from_query = getattr(p, 'select', None)
-        name = p.identifier
-        # check model and storage are in params
-        params = {k.lower(): v for k, v in params.items()}  # case insensitive
+        
+        if hasattr(p, 'identifier1'):
+            name = p.identifier0
+            from_query_alias = p.identifier1
+        else:
+            name = p.identifier
+            from_query_alias = None
+            
+        params = {k.lower(): v for k, v in params.items()}  
         model = params.pop('model', None)
         storage = params.pop('storage', None)
 
         if isinstance(model, str):
-            # convert to identifier
             storage = Identifier(storage)
 
         if isinstance(model, str):
-            # convert to identifier
             model = Identifier(model)
 
         if_not_exists = p.if_not_exists_or_empty
@@ -139,6 +146,7 @@ class MindsDBParser(Parser):
             model=model,
             storage=storage,
             from_select=from_query,
+            from_select_alias=from_query_alias,
             params=params,
             if_not_exists=if_not_exists
         )

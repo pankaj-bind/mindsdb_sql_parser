@@ -189,6 +189,35 @@ class TestKB:
         )
         assert ast == expected_ast
 
+    def test_create_knowledge_base_with_aliased_subquery(self):
+        sql = """
+            CREATE KNOWLEDGE_BASE my_aliased_kb
+            FROM (
+                SELECT id, content FROM my_table
+            ) AS data_alias
+            USING
+                MODEL = mindsdb.my_embedding_model
+        """
+        ast = parse_sql(sql)
+        expected_ast = CreateKnowledgeBase(
+            name=Identifier("my_aliased_kb"),
+            if_not_exists=False,
+            model=Identifier(parts=["mindsdb", "my_embedding_model"]),
+            storage=None,
+            from_select=Select(
+                targets=[
+                    Identifier("id"),
+                    Identifier("content"),
+                ],
+                from_table=Identifier("my_table"),
+            ),
+            from_select_alias=Identifier("data_alias"),
+            params={},
+        )
+        assert ast == expected_ast
+        assert "AS data_alias" in str(ast)
+
+
     def test_drop_knowledge_base(self):
         # drop if exists
         sql = """
