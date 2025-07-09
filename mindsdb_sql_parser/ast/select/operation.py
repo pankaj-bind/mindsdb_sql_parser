@@ -1,12 +1,11 @@
 from mindsdb_sql_parser.ast.base import ASTNode
 from mindsdb_sql_parser.exceptions import ParsingException
 from mindsdb_sql_parser.utils import indent
-
+from mindsdb_sql_parser.ast.select.tuple import Tuple
 
 class Operation(ASTNode):
     def __init__(self, op, args, *args_, **kwargs):
         super().__init__(*args_, **kwargs)
-        from mindsdb_sql_parser.ast import Tuple
 
         self.op = ' '.join(op.lower().split())
         self.args = []
