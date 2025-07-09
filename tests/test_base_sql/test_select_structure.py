@@ -1213,10 +1213,10 @@ class TestMindsdb:
         sql = 'select `KEY_ID`, `a`.* from `Table1` where `id`=2'
 
         expected_ast = Select(
-            targets=[Identifier('KEY_ID'), Identifier(parts=['a', Star()])],
-            from_table=Identifier(parts=['Table1']),
+            targets=[Identifier('`KEY_ID`'), Identifier(parts=['a', Star()], is_quoted=[True, False])],
+            from_table=Identifier(parts=['Table1'], is_quoted=[True]),
             where=BinaryOperation(op='=', args=[
-                Identifier('id'), Constant(2)
+                Identifier('`id`'), Constant(2)
             ])
         )
 

@@ -45,7 +45,10 @@ def get_reserved_words() -> set[str]:
 
 
 class Identifier(ASTNode):
-    def __init__(self, path_str=None, parts=None, is_outer=False, with_rollup=False, *args, **kwargs):
+    def __init__(
+            self, path_str=None, parts=None, is_outer=False, with_rollup=False,
+            is_quoted: list[bool] | None = None, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         assert path_str or parts, "Either path_str or parts must be provided for an Identifier"
         assert not (path_str and parts), "Provide either path_str or parts, but not both"
@@ -54,7 +57,7 @@ class Identifier(ASTNode):
 
         if path_str and not parts:
             parts, is_quoted = path_str_to_parts(path_str)
-        else:
+        elif is_quoted is None:
             is_quoted = [False] * len(parts)
         assert isinstance(parts, list)
         self.parts = parts
@@ -73,8 +76,7 @@ class Identifier(ASTNode):
         self.parts += other.parts
         self.is_quoted += other.is_quoted
 
-    def parts_to_str(self):
-        out_parts = []
+    def iter_parts_str(self):
         reserved_words = get_reserved_words()
         for part, is_quoted in zip(self.parts, self.is_quoted):
             if isinstance(part, Star):
@@ -86,9 +88,10 @@ class Identifier(ASTNode):
                     or part.upper() in reserved_words
                 ):
                     part = f'`{part}`'
+            yield part
 
-            out_parts.append(part)
-        return '.'.join(out_parts)
+    def parts_to_str(self):
+        return '.'.join(self.iter_parts_str())
 
     def to_tree(self, *args, level=0, **kwargs):
         alias_str = f', alias={self.alias.to_tree()}' if self.alias else ''
