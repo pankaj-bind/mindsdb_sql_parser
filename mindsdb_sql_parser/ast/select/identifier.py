@@ -27,15 +27,21 @@ RESERVED_KEYWORDS = {
 }
 
 
-def get_reserved_words():
-    from mindsdb_sql_parser.lexer import MindsDBLexer
+_reserved_keywords: set[str] = None
 
-    reserved = RESERVED_KEYWORDS
-    for word in MindsDBLexer.tokens:
-        if '_' not in word:
-            # exclude combinations
-            reserved.add(word)
-    return reserved
+
+def get_reserved_words() -> set[str]:
+    global _reserved_keywords
+
+    if _reserved_keywords is None:
+        from mindsdb_sql_parser.lexer import MindsDBLexer
+
+        _reserved_keywords = RESERVED_KEYWORDS
+        for word in MindsDBLexer.tokens:
+            if '_' not in word:
+                # exclude combinations
+                _reserved_keywords.add(word)
+    return _reserved_keywords
 
 
 class Identifier(ASTNode):
@@ -66,14 +72,14 @@ class Identifier(ASTNode):
     def parts_to_str(self):
         out_parts = []
         reserved_words = get_reserved_words()
-        for part in self.parts:
+        for part, is_quoted in zip(self.parts, self.is_quoted):
             if isinstance(part, Star):
                 part = str(part)
             else:
                 if (
-                    not no_wrap_identifier_regex.fullmatch(part)
-                    or
-                    part.upper() in reserved_words
+                    is_quoted
+                    or not no_wrap_identifier_regex.fullmatch(part)
+                    or part.upper() in reserved_words
                 ):
                     part = f'`{part}`'
 
