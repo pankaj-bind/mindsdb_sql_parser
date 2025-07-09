@@ -93,7 +93,7 @@ class TestShow:
         expected_ast = Show(
             category='COLUMNS',
             modes=['FULL'],
-            from_table=Identifier('files.concrete')
+            from_table=Identifier('`files`.`concrete`')
         )
 
         assert str(ast) == str(expected_ast)
