@@ -681,6 +681,18 @@ class TestSelectStructure:
         assert ast.to_tree() == expected_ast.to_tree()
         assert str(ast) == str(expected_ast)
 
+        sql = "SELECT col FROM tab WHERE col in (1)"
+        ast = parse_sql(sql)
+        expected_ast = Select(targets=[Identifier(parts=['col'])],
+                              from_table=Identifier(parts=['tab']),
+                              where=BinaryOperation(op='in',
+                                                    args=(
+                                                        Identifier(parts=['col']),
+                                                        Tuple(items=[Constant(1)])
+                                                    )))
+        assert ast.to_tree() == expected_ast.to_tree()
+        assert str(ast) == str(expected_ast)
+
     def test_count_distinct(self):
         sql = "SELECT COUNT(DISTINCT survived) AS uniq_survived FROM titanic"
         ast = parse_sql(sql)
