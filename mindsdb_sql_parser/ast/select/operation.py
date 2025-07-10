@@ -10,7 +10,7 @@ class Operation(ASTNode):
         self.op = ' '.join(op.lower().split())
         self.args = []
         for item in args:
-            if isinstance(item, ASTNode) and item.parentheses:
+            if self.op in ("in", "not in") and isinstance(item, ASTNode) and item.parentheses:
                 item.parentheses = False
                 item = Tuple([item])
             self.args.append(item)
