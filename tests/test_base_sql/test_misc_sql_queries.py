@@ -80,8 +80,8 @@ class TestMiscQueries:
     def test_table_with_order_by_limit_offset(self):
         sql = "TABLE my_table ORDER BY my_column LIMIT 10 OFFSET 5"
         ast = parse_sql(sql)
-        assert isinstance(ast, Table)
-        assert ast.name.to_string() == 'my_table'
+        assert isinstance(ast, Select)
+        assert ast.from_table.to_string() == 'my_table'
         assert ast.order_by[0].field.to_string() == 'my_column'
         assert ast.limit.value == 10
         assert ast.offset.value == 5

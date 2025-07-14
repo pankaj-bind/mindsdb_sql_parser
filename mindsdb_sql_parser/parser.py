@@ -2088,9 +2088,9 @@ class MindsDBParser(Parser):
     # region TABLE https://dev.mysql.com/doc/refman/8.4/en/table.html
     @_('TABLE identifier table_opt_order_by table_opt_limit table_opt_offset')
     def table(self, p):
-        from mindsdb_sql_parser.ast.table import Table
-        return Table(
-            name=p.identifier,
+        return Select(
+            targets=[Star()],
+            from_table=p.identifier,
             order_by=p.table_opt_order_by,
             limit=p.table_opt_limit,
             offset=p.table_opt_offset
