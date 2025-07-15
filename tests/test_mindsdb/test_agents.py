@@ -44,6 +44,14 @@ class TestAgents:
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()
 
+        sql = '''
+            alter agent my_agent
+            USING
+            model = 'new_model',
+            skills = ['new_skill1', 'new_skill2']
+        '''
+        ast = parse_sql(sql)
+
         # Parse again after rendering to catch problems with rendering.
         ast = parse_sql(str(ast))
         assert str(ast) == str(expected_ast)
