@@ -681,6 +681,18 @@ class TestSelectStructure:
         assert ast.to_tree() == expected_ast.to_tree()
         assert str(ast) == str(expected_ast)
 
+        sql = "SELECT col FROM tab WHERE col in (1)"
+        ast = parse_sql(sql)
+        expected_ast = Select(targets=[Identifier(parts=['col'])],
+                              from_table=Identifier(parts=['tab']),
+                              where=BinaryOperation(op='in',
+                                                    args=(
+                                                        Identifier(parts=['col']),
+                                                        Tuple(items=[Constant(1)])
+                                                    )))
+        assert ast.to_tree() == expected_ast.to_tree()
+        assert str(ast) == str(expected_ast)
+
     def test_count_distinct(self):
         sql = "SELECT COUNT(DISTINCT survived) AS uniq_survived FROM titanic"
         ast = parse_sql(sql)
@@ -1352,3 +1364,26 @@ class TestMindsdb:
         ast = parse_sql(query)
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()
+
+    def test_many_conditions(self):
+        sql = """
+            select * from kb where
+               (content like 'white' and size='small') 
+            or (content = 'big')
+        """
+        ast = parse_sql(sql)
+        expected_ast = Select(
+            targets=[Star()],
+            from_table=Identifier(parts=['kb']),
+            where=BinaryOperation(op='or', args=[
+                    BinaryOperation(op='and', args=[
+                        BinaryOperation(op='like', args=[Identifier('content'), Constant('white')]),
+                        BinaryOperation(op='=', args=[Identifier('size'), Constant('small')]),
+                    ], parentheses=True),
+                    BinaryOperation(op='=', args=[Identifier('content'), Constant('big')], parentheses=True),
+                ]
+            )
+        )
+        assert ast.to_tree() == expected_ast.to_tree()
+        assert str(ast) == str(expected_ast)
+

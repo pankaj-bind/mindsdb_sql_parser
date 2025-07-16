@@ -199,6 +199,7 @@ class MindsDBParser(Parser):
         return DropAgent(name=p.identifier, if_exists=p.if_exists_or_empty)
     
     @_('UPDATE AGENT identifier SET kw_parameter_list')
+    @_('ALTER AGENT identifier USING kw_parameter_list')
     def update_agent(self, p):
         return UpdateAgent(name=p.identifier, updated_params={k.lower(): v for k, v in p.kw_parameter_list.items()})
 
