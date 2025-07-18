@@ -2088,3 +2088,10 @@ class MindsDBParser(Parser):
         )
         # don't raise exception
         return
+
+    @_('TABLE identifier')
+    def select(self, p):
+        return Select(
+            targets=[Star()],
+            from_table=p.identifier,
+        )
