@@ -36,6 +36,7 @@ __all__ = ['Lexer', 'LexerStateChange', 'Token']
 import re
 import copy
 
+
 class LexError(Exception):
     '''
     Exception raised if an invalid character is encountered and no default
@@ -326,7 +327,15 @@ class Lexer(metaclass=LexerMeta):
         # Form the master regular expression
         #previous = ('|' + cls._master_re.pattern) if cls._master_re else ''
         # cls._master_re = cls.regex_module.compile('|'.join(parts) + previous, cls.reflags)
-        cls._master_re = cls.regex_module.compile('|'.join(parts), cls.reflags)
+        filtered_parts = []
+        string_parts = []
+        for p in parts:
+            if 'QUOTE_STRING' in p or 'DQUOTE_STRING' in p:
+                string_parts.append(p)
+            else:
+                filtered_parts.append(p)
+        cls._master_re = cls.regex_module.compile('|'.join(filtered_parts), cls.reflags)
+        cls._strings_pattern_re = cls.regex_module.compile('|'.join(string_parts), cls.reflags)
 
         # Verify that that ignore and literals specifiers match the input type
         if not isinstance(cls.ignore, str):
@@ -360,13 +369,14 @@ class Lexer(metaclass=LexerMeta):
         self.begin(self.__state_stack.pop())
 
     def tokenize(self, text, lineno=1, index=0):
-        _ignored_tokens = _master_re = _ignore = _token_funcs = _literals = _remapping = None
+        _ignored_tokens = _master_re =_strings_pattern_re = _ignore = _token_funcs = _literals = _remapping = None
 
         # --- Support for state changes
         def _set_state(cls):
-            nonlocal _ignored_tokens, _master_re, _ignore, _token_funcs, _literals, _remapping
+            nonlocal _ignored_tokens, _master_re, _strings_pattern_re, _ignore, _token_funcs, _literals, _remapping
             _ignored_tokens = cls._ignored_tokens
             _master_re = cls._master_re
+            _strings_pattern_re = cls._strings_pattern_re
             _ignore = cls.ignore
             _token_funcs = cls._token_funcs
             _literals = cls.literals
@@ -406,7 +416,11 @@ class Lexer(metaclass=LexerMeta):
                 tok = Token()
                 tok.lineno = lineno
                 tok.index = index
-                m = _master_re.match(text, index)
+
+                m = _strings_pattern_re.match(text, index)
+                if m is None:
+                    m = _master_re.match(text, index)
+
                 if m:
                     tok.end = index = m.end()
                     tok.value = m.group()
