@@ -36,6 +36,10 @@ __all__ = ['Lexer', 'LexerStateChange', 'Token']
 import re
 import copy
 
+
+_strings_pattern_re = re.compile('(?P<QUOTE_STRING>(\'(?:\\\\.|[^\'])*(?:\'\'(?:\\\\.|[^\'])*)*\'))|(?P<DQUOTE_STRING>("(?:\\\\.|[^"])*"))')
+
+
 class LexError(Exception):
     '''
     Exception raised if an invalid character is encountered and no default
@@ -406,7 +410,11 @@ class Lexer(metaclass=LexerMeta):
                 tok = Token()
                 tok.lineno = lineno
                 tok.index = index
-                m = _master_re.match(text, index)
+
+                m = _master_re.match(text, index, index + 50)
+                if m is None:
+                    m = _strings_pattern_re.match(text, index)
+
                 if m:
                     tok.end = index = m.end()
                     tok.value = m.group()
