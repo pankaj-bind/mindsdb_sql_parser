@@ -87,3 +87,48 @@ class TestCommonTableExpression:
         assert str(ast).lower() == sql.lower()
         assert str(ast) == str(expected_ast)
         assert ast.to_tree() == expected_ast.to_tree()
+
+    def test_cte_union(self):
+        sql = """
+            WITH ta AS (
+                SELECT 'a' AS a
+                UNION
+                SELECT 'b' AS a
+            ), tb AS (
+                SELECT 'c' AS a
+                UNION
+                SELECT 'd' AS a
+            )
+            SELECT a FROM ta
+            UNION
+            SELECT a FROM tb
+        """
+        ast = parse_sql(sql)
+
+        expected_ast = Union(
+            left=Select(
+                cte=[
+                    CommonTableExpression(
+                        name=Identifier('ta'),
+                        query=Union(
+                            left=Select(targets=[Constant('a', alias=Identifier('a'))]),
+                            right=Select(targets=[Constant('b', alias=Identifier('a'))])
+                        )
+                    ),
+                    CommonTableExpression(
+                        name=Identifier('tb'),
+                        query=Union(
+                            left=Select(targets=[Constant('c', alias=Identifier('a'))]),
+                            right=Select(targets=[Constant('d', alias=Identifier('a'))])
+                        )
+                    ),
+                ],
+                targets=[Identifier('a')],
+                from_table=Identifier('ta')
+            ),
+            right=Select(targets=[Identifier('a')], from_table=Identifier('tb'))
+        )
+
+        assert (' '.join(str(ast).split())).lower() == (' '.join(sql.split())).lower()
+        assert str(ast) == str(expected_ast)
+        assert ast.to_tree() == expected_ast.to_tree()
