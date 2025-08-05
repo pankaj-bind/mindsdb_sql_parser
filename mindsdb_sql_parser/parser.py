@@ -2006,11 +2006,11 @@ class MindsDBParser(Parser):
 
     @_('QUOTE_STRING')
     def quote_string(self, p):
-        return p[0].strip('\'')
+        return p[0].replace('\\"', '"').replace("\\'", "'").replace("''", "'").strip('\'')
 
     @_('DQUOTE_STRING')
     def dquote_string(self, p):
-        return p[0].strip('\"')
+        return p[0].replace('\\"', '"').replace("\\'", "'").strip('\"')
 
     # for raw query
 
