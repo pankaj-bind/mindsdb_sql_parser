@@ -1106,14 +1106,15 @@ class MindsDBParser(Parser):
         select.cte = p.ctes
         return select
 
-    @_('ctes COMMA identifier cte_columns_or_nothing AS LPAREN select RPAREN')
+    @_('ctes COMMA identifier cte_columns_or_nothing AS LPAREN select RPAREN',
+       'ctes COMMA identifier cte_columns_or_nothing AS LPAREN union RPAREN')
     def ctes(self, p):
         ctes = p.ctes
         ctes = ctes + [
             CommonTableExpression(
                 name=p.identifier,
                 columns=p.cte_columns_or_nothing,
-                query=p.select)
+                query=p[6])
         ]
         return ctes
 
